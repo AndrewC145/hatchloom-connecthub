@@ -5,6 +5,7 @@ import com.hatchloom.connecthub.connecthub_service.model.AchievementPost;
 import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
+import com.hatchloom.connecthub.connecthub_service.observer.PostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +16,12 @@ import java.util.List;
 @Service
 public class FeedPostService {
     private final FeedPostRepository feedPostRepository;
+    private final PostFeed postFeed;
 
-    public FeedPostService(FeedPostRepository feedPostRepository) {
+    public FeedPostService(FeedPostRepository feedPostRepository, PostFeed postFeed) {
         this.feedPostRepository = feedPostRepository;
+        this.postFeed = postFeed;
     }
-
 
     public Post createFeedPost(PostCreationRequest request) {
         Post post;
@@ -33,7 +35,10 @@ public class FeedPostService {
             case "achievement" -> post = new AchievementPost(title, content, authorId);
             default -> throw new IllegalArgumentException("Invalid post type: " + request.postType());
         }
-        return feedPostRepository.save(post);
+        Post newPost = feedPostRepository.save(post);
+        postFeed.notifyObservers(newPost);
+        return newPost;
+
     }
 
     public void deleteFeedPost(Integer postId) {

@@ -2,9 +2,9 @@ package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
+import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 // Service class for managing classified posts, including creation, retrieval, filtering, and status updates.
@@ -12,9 +12,11 @@ import java.util.List;
 @Service
 public class ClassifiedPostService {
     private final ClassifiedPostRepository classifiedPostRepository;
+    private final ClassifiedPostFeed classifiedPostFeed;
 
-    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository) {
+    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, ClassifiedPostFeed classifiedPostFeed) {
         this.classifiedPostRepository = classifiedPostRepository;
+        this.classifiedPostFeed = classifiedPostFeed;
     }
 
     public ClassifiedPost createClassifiedPost(ClassifiedPostCreationRequest request) {
