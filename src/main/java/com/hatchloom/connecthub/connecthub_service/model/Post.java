@@ -8,12 +8,11 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "posts")
+@MappedSuperclass
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeedPost {
+public abstract class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,11 +26,9 @@ public class FeedPost {
     @Column(nullable = false)
     private Integer author;
 
-    @Column(name = "post_type", nullable = false, length = 50)
-    private String postType;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-}
 
+    public abstract String getPostType();
+}
