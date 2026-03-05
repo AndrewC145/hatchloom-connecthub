@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.model;
 
+import com.hatchloom.connecthub.connecthub_service.enums.ClassifiedStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,7 +33,7 @@ public class ClassifiedPost {
     private Integer projectId;
 
     @Column(nullable = false, length = 20)
-    private String status = "open";
+    private String status = String.valueOf(ClassifiedStatus.OPEN);
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
