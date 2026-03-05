@@ -3,9 +3,8 @@ DROP TABLE IF EXISTS feed_actions CASCADE;
 DROP TABLE IF EXISTS classified_posts CASCADE;
 DROP TABLE IF EXISTS posts CASCADE;
 
-
 CREATE TABLE posts (
-    id IDENTITY PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     author INT NOT NULL,
@@ -14,7 +13,7 @@ CREATE TABLE posts (
 );
 
 CREATE TABLE classified_posts (
-    id IDENTITY PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     author INT NOT NULL,
@@ -24,9 +23,8 @@ CREATE TABLE classified_posts (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE feed_actions (
-    id IDENTITY PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     post_id INT NOT NULL,
     user_id INT NOT NULL,
     action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('like', 'comment')),
@@ -38,4 +36,3 @@ CREATE TABLE feed_actions (
         (action_type = 'comment' AND comment_text IS NOT NULL)
     )
 );
-
