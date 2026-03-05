@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FeedPostRepository extends JpaRepository<Post, Integer> {
         Post getPostById(Integer id);
+
+        void deletePostById(Integer id);
 }
