@@ -22,7 +22,7 @@ public class FeedPostController {
     public ResponseEntity<Post> createPost(@RequestBody PostCreationRequest request) {
         try {
             Post createdPost = feedPostService.createFeedPost(request);
-            return ResponseEntity.ok(createdPost);
+            return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -31,7 +31,7 @@ public class FeedPostController {
     @GetMapping()
     public ResponseEntity<List<Post>> getFeedPosts() {
         List<Post> posts = feedPostService.getAllFeedPosts();
-        return ResponseEntity.ok(posts);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     @DeleteMapping("/{postId}")
@@ -40,7 +40,7 @@ public class FeedPostController {
             @RequestParam Integer userId) {
         try {
             feedPostService.deleteFeedPost(postId, userId);
-            return ResponseEntity.ok("Post deleted successfully");
+            return new ResponseEntity<>("Post deleted successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

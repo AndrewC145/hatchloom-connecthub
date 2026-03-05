@@ -73,7 +73,7 @@ public class ClassifiedPostService {
         return status == null || (!status.equals("open") && !status.equals("filled") && !status.equals("closed"));
     }
 
-    public ClassifiedPost updateClassifiedPostStatus(Integer postId, String newStatus) {
+    public ClassifiedPost updateClassifiedPostStatus(Integer postId, Integer userId, String newStatus) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
         }
@@ -83,6 +83,11 @@ public class ClassifiedPostService {
         }
 
         ClassifiedPost post = classifiedPostRepository.getClassifiedPostById(postId).orElseThrow(() -> new IllegalArgumentException("Post with ID " + postId + " does not exist"));
+
+        if (!post.getAuthor().equals(userId)) {
+            throw new IllegalArgumentException("Only the author can update the post status");
+        }
+
         post.setStatus(newStatus);
         return classifiedPostRepository.save(post);
     }
