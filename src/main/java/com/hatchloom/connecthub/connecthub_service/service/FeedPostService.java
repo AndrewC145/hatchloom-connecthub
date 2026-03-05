@@ -41,13 +41,21 @@ public class FeedPostService {
 
     }
 
-    public void deleteFeedPost(Integer postId) {
+    public void deleteFeedPost(Integer postId, Integer userId) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
         }
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
+
         Post post = feedPostRepository.getPostById(postId);
         if (post == null) {
             throw new IllegalArgumentException("Post with ID " + postId + " does not exist");
+        }
+
+        if (!post.getAuthor().equals(userId)) {
+            throw new IllegalArgumentException("User " + userId + " is not authorized to delete post " + postId);
         }
 
         feedPostRepository.deletePostById(postId);
