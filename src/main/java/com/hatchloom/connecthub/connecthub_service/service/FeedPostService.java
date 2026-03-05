@@ -16,6 +16,6 @@ public class FeedPostService {
     }
 
     public Post createFeedPost(PostCreationRequest request) {
-
+        return null;
     }
 }

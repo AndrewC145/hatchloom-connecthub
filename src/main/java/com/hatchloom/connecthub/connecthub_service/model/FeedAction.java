@@ -23,9 +23,9 @@ public class FeedAction {
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false, updatable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private FeedPost post;
+    private Post post;
 
-    @Column(name = "post_id", nullable = false)
+    @Column(name = "post_id", nullable = false, insertable = false, updatable = false)
     private Integer postId;
 
     @Column(name = "user_id", nullable = false)
