@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+// Service class for managing classified posts, including creation, retrieval, filtering, and status updates.
+// Base implementation for now, pagination and user authorization will be added later
 @Service
 public class ClassifiedPostService {
     private final ClassifiedPostRepository classifiedPostRepository;
@@ -16,6 +18,25 @@ public class ClassifiedPostService {
     }
 
     public ClassifiedPost createClassifiedPost(ClassifiedPostCreationRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request must not be null");
+        }
+
+        if (request.basePost().title().length() > 255) {
+            throw new IllegalArgumentException("Title must not exceed 255 characters");
+        }
+        if (request.basePost().content().length() > 5000) {
+            throw new IllegalArgumentException("Content must not exceed 5000 characters");
+        }
+
+        if (validateStatus(request.status())) {
+            throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
+        }
+
+        if (request.projectId() <= 0) {
+            throw new IllegalArgumentException("Project ID must be a positive integer");
+        }
+
         ClassifiedPost post = new ClassifiedPost();
         post.setTitle(request.basePost().title());
         post.setContent(request.basePost().content());
@@ -30,6 +51,10 @@ public class ClassifiedPostService {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
         }
+        if (postId <= 0) {
+            throw new IllegalArgumentException("Post ID must be a positive integer");
+        }
+
         if (!classifiedPostRepository.existsById(postId)) {
             throw new IllegalArgumentException("Post with ID " + postId + " does not exist");
         }
@@ -37,17 +62,24 @@ public class ClassifiedPostService {
     }
 
     public List<ClassifiedPost> filterClassifiedPostsByStatus(String status) {
-        if (status == null || (!status.equals("open") && !status.equals("filled") && !status.equals("closed"))) {
+        if (validateStatus(status)) {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
         }
-        return classifiedPostRepository.findByStatus(status);
+
+        String normalizedStatus = status.trim().toLowerCase();
+        return classifiedPostRepository.findByStatus(normalizedStatus);
+    }
+
+    private boolean validateStatus(String status) {
+        return status == null || (!status.equals("open") && !status.equals("filled") && !status.equals("closed"));
     }
 
     public ClassifiedPost updateClassifiedPostStatus(Integer postId, String newStatus) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
         }
-        if (newStatus == null || (!newStatus.equals("open") && !newStatus.equals("filled") && !newStatus.equals("closed"))) {
+
+        if (validateStatus(newStatus)) {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
         }
 

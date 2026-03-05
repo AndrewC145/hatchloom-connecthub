@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+// Service for managing feed post CRUD
+// Base implementation for now, authorization and pagination will be added later
 @Service
 public class FeedPostService {
     private final FeedPostRepository feedPostRepository;
