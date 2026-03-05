@@ -6,7 +6,6 @@ import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
