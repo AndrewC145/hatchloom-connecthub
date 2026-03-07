@@ -29,6 +29,22 @@ public class FeedPostService {
         String content = request.basePost().content();
         Integer authorId = request.basePost().authorId();
 
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Post title must not be null or blank");
+        }
+
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Post content must not be null or blank");
+        }
+
+        if (authorId == null) {
+            throw new IllegalArgumentException("Author ID must not be null");
+        }
+
+        if (request.postType() == null || request.postType().isBlank()) {
+            throw new IllegalArgumentException("Post type must not be null or blank");
+        }
+
         switch (request.postType()) {
             case "share" -> post = new SharePost(title, content, authorId);
             case "announcement" -> post = new AnnouncementPost(title, content, authorId);
