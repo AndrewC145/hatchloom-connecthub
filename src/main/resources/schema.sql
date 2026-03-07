@@ -29,8 +29,10 @@ CREATE TABLE feed_actions (
     user_id INT NOT NULL,
     action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('like', 'comment')),
     comment_text TEXT,
+    parent_action_id INT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_action_id) REFERENCES feed_actions(id) ON DELETE CASCADE,
     CONSTRAINT check_comment_text CHECK (
         (action_type = 'like' AND comment_text IS NULL) OR
         (action_type = 'comment' AND comment_text IS NOT NULL)
