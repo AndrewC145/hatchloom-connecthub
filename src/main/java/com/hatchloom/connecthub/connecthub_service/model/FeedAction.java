@@ -37,8 +37,10 @@ public class FeedAction {
     @Column(name = "comment_text", columnDefinition = "TEXT")
     private String commentText;
 
+    @Column(name = "parent_action_id")
+    private Integer parentActionId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }
-
