@@ -16,24 +16,10 @@ public class ClassifiedPostService {
         this.classifiedPostRepository = classifiedPostRepository;
     }
 
+
     public ClassifiedPost createClassifiedPost(ClassifiedPostCreationRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Request must not be null");
-        }
-
-        if (request.basePost().title().length() > 255) {
-            throw new IllegalArgumentException("Title must not exceed 255 characters");
-        }
-        if (request.basePost().content().length() > 5000) {
-            throw new IllegalArgumentException("Content must not exceed 5000 characters");
-        }
-
-        if (validateStatus(request.status())) {
-            throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
-        }
-
-        if (request.projectId() <= 0) {
-            throw new IllegalArgumentException("Project ID must be a positive integer");
+        if (validateClassifiedRequest(request)) {
+            throw new IllegalArgumentException("Invalid classified post creation request");
         }
 
         ClassifiedPost post = new ClassifiedPost();
@@ -95,5 +81,43 @@ public class ClassifiedPostService {
     // Template method for now, pagination of some sort will be better performance wise
     public List<ClassifiedPost> getAllClassifiedPosts() {
         return classifiedPostRepository.findAll();
+    }
+
+    private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request must not be null");
+        }
+
+        if (request.basePost().title() == null || request.basePost().title().trim().isEmpty()) {
+            throw new IllegalArgumentException("Title must not be null or empty");
+        }
+        if (request.basePost().content() == null || request.basePost().content().trim().isEmpty()) {
+            throw new IllegalArgumentException("Content must not be null or empty");
+        }
+
+        if (request.basePost().authorId() == null) {
+            throw new IllegalArgumentException("Author ID must not be null");
+        }
+
+        if (request.projectId() == null) {
+            throw new IllegalArgumentException("Project ID must not be null");
+        }
+
+        if (request.basePost().title().length() > 255) {
+            throw new IllegalArgumentException("Title must not exceed 255 characters");
+        }
+        if (request.basePost().content().length() > 3000) {
+            throw new IllegalArgumentException("Content must not exceed 3000 characters");
+        }
+
+        if (validateStatus(request.status())) {
+            throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
+        }
+
+        if (request.projectId() <= 0) {
+            throw new IllegalArgumentException("Project ID must be a positive integer");
+        }
+
+        return false;
     }
 }

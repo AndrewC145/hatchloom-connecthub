@@ -30,9 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class FeedPostServiceTest {
     @Autowired
-    private FeedPostService feedPostService;
-
-    @Autowired
     private FeedPostRepository feedPostRepository;
 
     @Autowired
@@ -40,18 +37,6 @@ class FeedPostServiceTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    static class BaseUser {
-        public Integer id;
-        public String name;
-        public String email;
-
-        public BaseUser(Integer id, String name, String email) {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-        }
-    }
 
     private BaseUser testUser;
 
