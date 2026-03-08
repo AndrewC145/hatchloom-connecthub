@@ -88,7 +88,12 @@ public class FeedActionService {
                 commentId, userId, ActionType.COMMENT.getValue());
 
         if (comment.isEmpty()) {
-            throw new IllegalArgumentException("Comment not found or user is not authorized to delete this comment");
+            throw new IllegalArgumentException("Comment not found");
+        }
+
+        Post parentPost = feedPostRepository.getPostById(comment.get().getPostId());
+        if (parentPost.getAuthor() != null && !parentPost.getAuthor().equals(userId) && !comment.get().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("User is not authorized to delete this comment");
         }
 
         feedActionRepository.delete(comment.get());
