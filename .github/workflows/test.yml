@@ -54,14 +54,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Convert owner name to lowercase
-        id: lowercase
-        run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+        run: |
+          echo "OWNER_LC=$(OWNER,,)" >> $GITHUB_ENV
+        env:
+            OWNER: ${{ github.repository_owner }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/${{ github.repository }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
