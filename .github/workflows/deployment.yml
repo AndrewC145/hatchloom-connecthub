@@ -1,0 +1,36 @@
+name: Deployment Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Github Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and Docker Image
+        run: |
+          docker pull ghcr.io/${{ github.repository }}:latest
+
+      - name: Stop existing container
+        run: |
+          docker stop connecthub || true
+          docker rm connecthub || true
+
+      - name: Run new container
+        run: | 
+            docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ github.repository }}:latest
+          
+      
