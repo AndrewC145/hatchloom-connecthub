@@ -19,10 +19,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Convert owner name to lowercase
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+        env:
+          OWNER: ${{ github.repository_owner }}
 
       - name: Pull and Docker Image
         run: |
-          docker pull ghcr.io/${{ github.repository }}:latest
+          docker pull ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
 
       - name: Stop existing container
         run: |
@@ -31,6 +36,6 @@ jobs:
 
       - name: Run new container
         run: | 
-            docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ github.repository }}:latest
+            docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
           
       
