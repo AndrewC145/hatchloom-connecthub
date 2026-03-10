@@ -25,7 +25,7 @@ jobs:
         env:
           OWNER: ${{ github.repository_owner }}
 
-      - name: Pull and Docker Image
+      - name: Pull Docker Image
         run: |
           docker pull ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
 
