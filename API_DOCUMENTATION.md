@@ -23,6 +23,17 @@ classified posts which are to be part of the Launchpad service.
 
 ---
 
+## General Diagram Functionality
+**Creating a post**
+![Creating a post](./src/main/resources/static/images/createPost.png)
+
+**Getting posts**
+![Getting posts](./src/main/resources/static/images/getPostsDiagram.png)
+
+**Creating a classified post**
+![Creating a classified post](./src/main/resources/static/images/classifiedPost.png)
+---
+
 ## Feed Post Service
 
 ### Overview
