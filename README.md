@@ -34,3 +34,10 @@ To stop the services, run the following command:
 ```bash
 docker-compose down
 ```
+---
+## Requirements
+- Java 25
+- PostgreSQL 14
+- Maven 3.9+
+- Docker
+- Docker Compose
