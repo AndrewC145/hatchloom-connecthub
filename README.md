@@ -20,6 +20,8 @@ This command will build the Docker images, such as the Connecthub service and th
 
 The application will now be running on http://localhost:8080
 
+You will be presented with a login page because of the built-in Spring Security configuration.
+
 ### 3. Stop the services
 To stop the services, run the following command:
 ```bash
