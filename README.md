@@ -22,7 +22,14 @@ The application will now be running on http://localhost:8080
 
 You will be presented with a login page because of the built-in Spring Security configuration.
 
-### 3. Stop the services
+### 3. Run Test Cases
+To run the test cases, execute the following command:
+```bash
+mvn test
+````
+This command will run all the test cases for the project located from the test folder using an H2 memory database
+
+### 4. Stop the services
 To stop the services, run the following command:
 ```bash
 docker-compose down
