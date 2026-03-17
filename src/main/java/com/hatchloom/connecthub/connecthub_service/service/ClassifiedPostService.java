@@ -1,10 +1,16 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
+import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedCursorPayload;
+import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 // Service class for managing classified posts, including creation, retrieval, filtering, and status updates.
 // Base implementation for now, pagination and user authorization will be added later
@@ -78,9 +84,47 @@ public class ClassifiedPostService {
         return classifiedPostRepository.save(post);
     }
 
-    // Template method for now, pagination of some sort will be better performance wise
-    public List<ClassifiedPost> getAllClassifiedPosts() {
-        return classifiedPostRepository.findAll();
+
+    public CursorResponse<ClassifiedPost> getAllClassifiedPosts(String after, Integer limit, String status) {
+        if (validateStatus(status)) {
+            throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
+        }
+
+        int pageSize;
+        if (limit == null || limit <= 0) {
+            pageSize = 25;
+        } else {
+            pageSize = limit;
+        }
+
+        Pageable pageable = Pageable.ofSize(pageSize + 1);
+        List<ClassifiedPost> posts;
+
+        if (after == null || after.isBlank()) {
+            posts = classifiedPostRepository.findByStatusOrderByCreatedAtDescIdDesc(status, pageable);
+        } else {
+            ClassifiedCursorPayload payload = new CursorPaginationCodec().decodeCursor(after);
+            LocalDateTime createdAt;
+
+            try {
+                createdAt = LocalDateTime.parse(payload.createdAt());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid cursor createdAt format: " + e.getMessage());
+            }
+
+            posts = classifiedPostRepository.findByStatusWithCursor(status, createdAt, payload.id(), pageable);
+        }
+
+        boolean hasNext = posts.size() > pageSize;
+        posts = hasNext ? posts.subList(0, pageSize) : posts;
+        String nextCursor = null;
+
+        if (hasNext && !posts.isEmpty()) {
+            ClassifiedPost lastPost = posts.getLast();
+            nextCursor = CursorPaginationCodec.encodeCursor(lastPost.getId(), lastPost.getCreatedAt().toString());
+        }
+
+        return new CursorResponse<>(posts, nextCursor, hasNext);
     }
 
     private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request) {
