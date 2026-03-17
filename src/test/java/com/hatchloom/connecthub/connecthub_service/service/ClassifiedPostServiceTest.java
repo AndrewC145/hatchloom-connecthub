@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.dto.BasePostRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
 import org.junit.jupiter.api.Assertions;
@@ -223,6 +224,93 @@ class ClassifiedPostServiceTest {
         Assertions.assertEquals(1, classifiedPostRepository.count());
         ClassifiedPost post = classifiedPostRepository.findAll().getFirst();
         Assertions.assertEquals("open", post.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test fetching classified posts for first page")
+    void testGetClassifiedPostsWithPagination() throws Exception {
+        int upperLimit = 100;
+
+        for (int i = 0; i < upperLimit; i++) {
+            ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post" + i,
+                    "This is a classified test", testUser.id), testProject.id, "open");
+
+            mockMvc.perform(post("/api/classified")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+            .with(csrf())
+                    .with(user("testuser")))
+                    .andExpect(status().isCreated());
+        }
+
+        mockMvc.perform(get("/api/classified")
+                .param("limit", "25")
+                .with(csrf())
+                .with(user("testuser")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(25))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.nextCursor").isNotEmpty());
+
+    }
+
+    @Test
+    @DisplayName("Test fetching classified posts across multiple pages")
+    void testGetClassifiedPostsMultiplePages() throws Exception {
+        int upperLimit = 100;
+        boolean hasMore;
+        String nextCursor = "";
+        int totalFetched = 0;
+
+        for (int i = 0; i < upperLimit; i++) {
+            ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post" + i,
+                    "This is a classified test", testUser.id), testProject.id, "open");
+
+            mockMvc.perform(post("/api/classified")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto))
+                            .with(csrf())
+                            .with(user("testuser")))
+                    .andExpect(status().isCreated());
+        }
+
+        while (true) {
+            String response = mockMvc.perform(get("/api/classified")
+                    .param("limit", "25").param("after", nextCursor)
+                    .with(csrf())
+                    .with(user("testuser")))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            CursorResponse<ClassifiedPost> cursorResponse = objectMapper.readValue(response, objectMapper.getTypeFactory().constructParametricType(CursorResponse.class, ClassifiedPost.class));
+            List<ClassifiedPost> posts = cursorResponse.getData();
+
+            for (ClassifiedPost post : posts) {
+                Assertions.assertEquals("open", post.getStatus());
+                totalFetched++;
+            }
+
+            String next = cursorResponse.getNextCursor();
+            hasMore = cursorResponse.isHasNext();
+
+            if (!hasMore) {
+                break;
+            }
+
+            nextCursor = next;
+        }
+        Assertions.assertFalse(hasMore);
+        Assertions.assertEquals(upperLimit, totalFetched);
+    }
+
+    @Test
+    @DisplayName("Test fetching classified posts with invalid status")
+    void testGetClassifiedPostsInvalidStatus() throws Exception {
+        mockMvc.perform(get("/api/classified")
+                .param("statusType", "invalid")
+                .with(csrf())
+                .with(user("testuser")))
+                .andExpect(status().isBadRequest());
     }
 
 }
