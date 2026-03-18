@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.data.domain.Pageable;
 
 // Service class for managing classified posts, including creation, retrieval, filtering, and status updates.
 // Base implementation for now, pagination and user authorization will be added later
