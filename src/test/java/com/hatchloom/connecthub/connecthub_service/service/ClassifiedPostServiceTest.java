@@ -287,6 +287,10 @@ class ClassifiedPostServiceTest {
 
             for (ClassifiedPost post : posts) {
                 Assertions.assertEquals("open", post.getStatus());
+                Assertions.assertNotNull(post.getId());
+                Assertions.assertNotNull(post.getTitle());
+                Assertions.assertNotNull(post.getContent());
+                Assertions.assertNotNull(post.getAuthor());
                 totalFetched++;
             }
 
