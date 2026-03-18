@@ -50,6 +50,15 @@ CREATE TABLE conversations (
     UNIQUE (user1_id, user2_id)
 );
 
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+);
+
 CREATE TABLE participants (
     id SERIAL PRIMARY KEY,
     conversation_id INT NOT NULL,
@@ -60,12 +69,4 @@ CREATE TABLE participants (
     UNIQUE (conversation_id, user_id)
 );
 
-CREATE TABLE messages (
-    id SERIAL PRIMARY KEY,
-    conversation_id INT NOT NULL,
-    sender_id INT NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
-);
 
