@@ -8,7 +8,6 @@ import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
 import com.hatchloom.connecthub.connecthub_service.observer.PostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
-import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedCursorPayload;
 import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
 import com.hatchloom.connecthub.connecthub_service.utils.PostCursorPayload;
 import org.springframework.stereotype.Service;
