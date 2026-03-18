@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.PostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.model.AchievementPost;
 import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
@@ -7,9 +8,12 @@ import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
 import com.hatchloom.connecthub.connecthub_service.observer.PostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
+import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedCursorPayload;
+import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
+import com.hatchloom.connecthub.connecthub_service.utils.PostCursorPayload;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 // Service for managing feed post CRUD
 // Base implementation for now, authorization and pagination will be added later
@@ -17,10 +21,12 @@ import java.util.List;
 public class FeedPostService {
     private final FeedPostRepository feedPostRepository;
     private final PostFeed postFeed;
+    private final CursorPaginationService cursorPaginationService;
 
-    public FeedPostService(FeedPostRepository feedPostRepository, PostFeed postFeed) {
+    public FeedPostService(FeedPostRepository feedPostRepository, PostFeed postFeed, CursorPaginationService cursorPaginationService) {
         this.feedPostRepository = feedPostRepository;
         this.postFeed = postFeed;
+        this.cursorPaginationService = cursorPaginationService;
     }
 
     public Post createFeedPost(PostCreationRequest request) {
@@ -77,8 +83,16 @@ public class FeedPostService {
         feedPostRepository.deletePostById(postId);
     }
 
-    // Template method for now, pagination of some sort will be better performance wise
-    public List<Post> getAllFeedPosts() {
-        return feedPostRepository.findAll();
+
+    public CursorResponse<Post> getAllFeedPosts(String after, Integer limit) {
+        return cursorPaginationService.paginate(after, limit, feedPostRepository::findAllByOrderByCreatedAtDescIdDesc,
+                (payload, pageable) -> {
+                    LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
+                    return feedPostRepository.findAllWithCursor(createdAt, payload.id(), pageable);
+                },
+                cursor -> CursorPaginationCodec.decodeCursor(cursor, PostCursorPayload::new),
+                payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
+                post -> new PostCursorPayload(post.getCreatedAt().toString(), post.getId())
+        );
     }
 }

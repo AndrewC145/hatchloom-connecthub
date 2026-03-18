@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.PostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.service.FeedPostService;
@@ -29,9 +30,14 @@ public class FeedPostController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Post>> getFeedPosts() {
-        List<Post> posts = feedPostService.getAllFeedPosts();
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+    public ResponseEntity<CursorResponse<Post>> getFeedPosts(@RequestParam(defaultValue = "25") Integer limit,
+                                                             @RequestParam(required = false) String after) {
+        try {
+            CursorResponse<Post> response = feedPostService.getAllFeedPosts(after, limit);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @DeleteMapping("/{postId}")
