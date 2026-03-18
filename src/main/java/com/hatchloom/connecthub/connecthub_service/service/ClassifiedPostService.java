@@ -1,9 +1,14 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
+import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedCursorPayload;
+import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 // Service class for managing classified posts, including creation, retrieval, filtering, and status updates.
@@ -11,9 +16,11 @@ import java.util.List;
 @Service
 public class ClassifiedPostService {
     private final ClassifiedPostRepository classifiedPostRepository;
+    private final CursorPaginationService cursorPaginationService;
 
-    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository) {
+    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, CursorPaginationService cursorPaginationService) {
         this.classifiedPostRepository = classifiedPostRepository;
+        this.cursorPaginationService = cursorPaginationService;
     }
 
 
@@ -78,9 +85,21 @@ public class ClassifiedPostService {
         return classifiedPostRepository.save(post);
     }
 
-    // Template method for now, pagination of some sort will be better performance wise
-    public List<ClassifiedPost> getAllClassifiedPosts() {
-        return classifiedPostRepository.findAll();
+
+    public CursorResponse<ClassifiedPost> getAllClassifiedPosts(String after, Integer limit, String status) {
+        if (validateStatus(status)) {
+            throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
+        }
+
+        return cursorPaginationService.paginate(after, limit, pageable -> classifiedPostRepository.findByStatusOrderByCreatedAtDescIdDesc(status, pageable),
+                (payload, pageable) -> {
+                    LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
+                    return classifiedPostRepository.findByStatusWithCursor(status, createdAt, payload.id(), pageable);
+                },
+                    cursor -> CursorPaginationCodec.decodeCursor(cursor, ClassifiedCursorPayload::new),
+                payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
+                post -> new ClassifiedCursorPayload(post.getCreatedAt().toString(), post.getId())
+                );
     }
 
     private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request) {

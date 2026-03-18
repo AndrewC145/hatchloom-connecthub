@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostService;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,18 @@ public class ClassifiedPostController {
             ClassifiedPost createdPost = classifiedPostService.createClassifiedPost(request);
             return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping()
+    public ResponseEntity<CursorResponse<ClassifiedPost>> getClassifiedPosts(@RequestParam(defaultValue = "25") Integer limit
+    , @RequestParam(required = false) String after, @RequestParam(defaultValue = "open") String statusType) {
+        try {
+            CursorResponse<ClassifiedPost> response = classifiedPostService.getAllClassifiedPosts(after, limit, statusType);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }

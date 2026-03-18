@@ -1,6 +1,8 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.dto.BasePostRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.FeedPostResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.PostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
@@ -21,8 +23,7 @@ import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -62,7 +63,9 @@ class FeedPostServiceTest {
                 .andExpect(jsonPath("$.author").value(testUser.id));
 
         Assertions.assertEquals(1, feedPostRepository.count());
-        SharePost post = (SharePost) feedPostRepository.getPostById(1);
+        Post saved = feedPostRepository.findAll().getFirst();
+
+        SharePost post = (SharePost) saved;
 
         Assertions.assertEquals("Test Post 1", post.getTitle());
         Assertions.assertEquals("This is a test post", post.getContent());
@@ -224,5 +227,86 @@ class FeedPostServiceTest {
                 .andExpect(content().string("User " + (testUser.id + 1) + " is not authorized to delete post " + post.getId()));
 
         Assertions.assertEquals(1, feedPostRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test fetching posts for first page")
+    void testGetFeedPostsWithPagination() throws Exception {
+        for (int i = 1; i <= 45; i++) {
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + i, "This is test post number " + i, testUser.id), "share");
+            mockMvc.perform(post("/api/feed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+                    .with(csrf())
+                    .with(user("testuser")))
+                    .andExpect(status().isCreated());
+        }
+
+        mockMvc.perform(get("/api/feed")
+                .param("limit", "25")
+                .with(csrf())
+                .with(user("testuser")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(25))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.nextCursor").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Test fetching posts across multiple pages")
+    void testGetPostsMultiplePages() throws Exception {
+        int upperLimit = 100;
+        boolean hasMore;
+        String nextCursor = "";
+        int totalFetched = 0;
+
+        for (int i = 0; i < upperLimit; i++) {
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + (i), "This is test post number " + (i), testUser.id), "share");
+            mockMvc.perform(post("/api/feed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+                    .with(csrf())
+                    .with(user("testuser")))
+                    .andExpect(status().isCreated());
+        }
+
+        for (int i = upperLimit; i < upperLimit * 2; i++) {
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + (i), "This is test post number " + (i), testUser.id), "achievement");
+            mockMvc.perform(post("/api/feed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+                    .with(csrf())
+                    .with(user("testuser")))
+                    .andExpect(status().isCreated());
+        }
+
+        while (true) {
+            String response = mockMvc.perform(get("/api/feed")
+                    .param("limit", "25").param("after", nextCursor)
+                    .with(csrf())
+                    .with(user("testuser")))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            CursorResponse<FeedPostResponse> cursorResponse = objectMapper.readValue(response, objectMapper.getTypeFactory().constructParametricType(CursorResponse.class, FeedPostResponse.class));
+            List<FeedPostResponse> posts = cursorResponse.getData();
+            for (FeedPostResponse post : posts) {
+                Assertions.assertNotNull(post.id());
+                Assertions.assertNotNull(post.title());
+                Assertions.assertNotNull(post.content());
+                Assertions.assertNotNull(post.author());
+                totalFetched++;
+            }
+
+            String next = cursorResponse.getNextCursor();
+            hasMore = cursorResponse.isHasNext();
+            if (!hasMore) {
+                break;
+            }
+            nextCursor = next;
+        }
+
+        Assertions.assertFalse(hasMore);
+        Assertions.assertEquals(upperLimit * 2, totalFetched);
     }
 }
