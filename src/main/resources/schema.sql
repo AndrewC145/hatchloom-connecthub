@@ -48,7 +48,7 @@ CREATE TABLE conversations (
     user2_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user1_id, user2_id)
-)
+);
 
 CREATE TABLE participants (
     id SERIAL PRIMARY KEY,
@@ -58,7 +58,7 @@ CREATE TABLE participants (
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
     FOREIGN KEY (last_read_message_id) REFERENCES messages(id) ON DELETE SET NULL,
     UNIQUE (conversation_id, user_id)
-)
+);
 
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
@@ -67,5 +67,5 @@ CREATE TABLE messages (
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
-)
+);
 
