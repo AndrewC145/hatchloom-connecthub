@@ -17,9 +17,11 @@ import org.springframework.data.domain.Pageable;
 @Service
 public class ClassifiedPostService {
     private final ClassifiedPostRepository classifiedPostRepository;
+    private final CursorPaginationService cursorPaginationService;
 
-    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository) {
+    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, CursorPaginationService cursorPaginationService) {
         this.classifiedPostRepository = classifiedPostRepository;
+        this.cursorPaginationService = cursorPaginationService;
     }
 
 
@@ -90,41 +92,15 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
         }
 
-        int pageSize;
-        if (limit == null || limit <= 0) {
-            pageSize = 25;
-        } else {
-            pageSize = limit;
-        }
-
-        Pageable pageable = Pageable.ofSize(pageSize + 1);
-        List<ClassifiedPost> posts;
-
-        if (after == null || after.isBlank()) {
-            posts = classifiedPostRepository.findByStatusOrderByCreatedAtDescIdDesc(status, pageable);
-        } else {
-            ClassifiedCursorPayload payload = new CursorPaginationCodec().decodeCursor(after);
-            LocalDateTime createdAt;
-
-            try {
-                createdAt = LocalDateTime.parse(payload.createdAt());
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid cursor createdAt format: " + e.getMessage());
-            }
-
-            posts = classifiedPostRepository.findByStatusWithCursor(status, createdAt, payload.id(), pageable);
-        }
-
-        boolean hasNext = posts.size() > pageSize;
-        posts = hasNext ? posts.subList(0, pageSize) : posts;
-        String nextCursor = null;
-
-        if (hasNext && !posts.isEmpty()) {
-            ClassifiedPost lastPost = posts.getLast();
-            nextCursor = CursorPaginationCodec.encodeCursor(lastPost.getId(), lastPost.getCreatedAt().toString());
-        }
-
-        return new CursorResponse<>(posts, nextCursor, hasNext);
+        return cursorPaginationService.paginate(after, limit, pageable -> classifiedPostRepository.findByStatusOrderByCreatedAtDescIdDesc(status, pageable),
+                (payload, pageable) -> {
+                    LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
+                    return classifiedPostRepository.findByStatusWithCursor(status, createdAt, payload.id(), pageable);
+                },
+                    cursor -> CursorPaginationCodec.decodeCursor(cursor, ClassifiedCursorPayload::new),
+                payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
+                post -> new ClassifiedCursorPayload(post.getCreatedAt().toString(), post.getId())
+                );
     }
 
     private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request) {
