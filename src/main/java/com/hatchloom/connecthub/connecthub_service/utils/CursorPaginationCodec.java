@@ -1,5 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.utils;
 import java.util.Base64;
+import java.util.function.BiFunction;
+
 public class CursorPaginationCodec {
 
     public static String encodeCursor(Integer id, String createdAt) {
@@ -7,7 +9,7 @@ public class CursorPaginationCodec {
         return Base64.getEncoder().encodeToString(cursorData.getBytes());
     }
 
-    public ClassifiedCursorPayload decodeCursor(String cursor) {
+    public static <T extends CursorPayload> T decodeCursor(String cursor, BiFunction<String, Integer, T> payloadBiFunction) {
         try {
             byte[] decoded = Base64.getDecoder().decode(cursor);
             String decodedString = new String(decoded);
@@ -20,7 +22,7 @@ public class CursorPaginationCodec {
             Integer id = Integer.parseInt(parts[0]);
             String createdAt = parts[1];
 
-            return new ClassifiedCursorPayload(createdAt, id);
+            return payloadBiFunction.apply(createdAt, id);
         }
         catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Failed to decode cursor: " + e.getMessage());
