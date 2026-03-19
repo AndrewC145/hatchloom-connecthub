@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.builder.NotificationBuilder;
+import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 import com.hatchloom.connecthub.connecthub_service.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,29 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getNotifications(Integer userId, boolean unread) {
+    public List<Notification> getClassifiedNotifications(Integer userId, boolean unread) {
         if (unread) {
-            return notificationRepository.findByRecipientUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
+            return notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
+                    userId, NotificationType.CLASSIFIED_CREATED
+            );
         }
         else {
-            return notificationRepository.findByRecipientUserIdOrderByCreatedAtDesc(userId);
+            return notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
+                    userId, NotificationType.CLASSIFIED_CREATED
+            );
+        }
+    }
+
+    public List<Notification> getMessageNotifications(Integer userId, boolean unread) {
+        if (unread) {
+            return notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
+                    userId, NotificationType.MESSAGE
+            );
+        }
+        else {
+            return notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
+                    userId, NotificationType.MESSAGE
+            );
         }
     }
 
