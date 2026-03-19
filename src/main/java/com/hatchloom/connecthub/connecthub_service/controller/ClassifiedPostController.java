@@ -68,8 +68,8 @@ public class ClassifiedPostController {
     @PutMapping("/{postId}/status")
     public ResponseEntity<ClassifiedPost> updateClassifiedStatus(
             @PathVariable Integer postId,
-            @RequestParam Integer userId,
-            @RequestParam String newStatus) {
+            @RequestBody Integer userId,
+            @RequestBody String newStatus) {
         try {
             ClassifiedPost updatedPost = classifiedPostService.updateClassifiedPostStatus(postId, userId, newStatus);
             return new ResponseEntity<>(updatedPost, HttpStatus.OK);
@@ -79,7 +79,7 @@ public class ClassifiedPostController {
     }
 
     @PostMapping("/subscriptions")
-    public ResponseEntity<String> subscribe(@RequestParam Integer userId) {
+    public ResponseEntity<String> subscribe(@RequestBody Integer userId) {
         try {
             classifiedPostFeed.subscribe(userId);
             return new ResponseEntity<>("Subscribed successfully", HttpStatus.OK);

@@ -102,7 +102,7 @@ public class FeedActionController {
     @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<?> likeComment(
             @PathVariable Integer commentId,
-            @RequestParam Integer userId) {
+            @RequestBody Integer userId) {
         try {
             FeedAction like = feedActionService.likeComment(commentId, userId);
             return new ResponseEntity<>(like, HttpStatus.CREATED);

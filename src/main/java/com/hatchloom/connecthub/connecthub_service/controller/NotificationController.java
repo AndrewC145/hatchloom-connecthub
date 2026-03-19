@@ -28,7 +28,7 @@ public class NotificationController {
 
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Integer notificationId,
-                                           @RequestParam Integer userId) {
+                                           @RequestBody Integer userId) {
         notificationService.markAsRead(notificationId, userId);
         return ResponseEntity.ok().build();
     }
