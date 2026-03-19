@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS classified_subscriptions CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
-DROP TABLE IF EXISTS participants CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS conversations CASCADE;
 DROP TABLE IF EXISTS feed_actions CASCADE;
@@ -49,7 +48,8 @@ CREATE TABLE conversations (
     user1_id INT NOT NULL,
     user2_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user1_id, user2_id)
+    UNIQUE (user1_id, user2_id),
+    CONSTRAINT check_user_order CHECK (user1_id < user2_id)
 );
 
 CREATE TABLE messages (
@@ -59,16 +59,6 @@ CREATE TABLE messages (
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
-);
-
-CREATE TABLE participants (
-    id SERIAL PRIMARY KEY,
-    conversation_id INT NOT NULL,
-    user_id INT NOT NULL,
-    last_read_message_id INT,
-    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
-    FOREIGN KEY (last_read_message_id) REFERENCES messages(id) ON DELETE SET NULL,
-    UNIQUE (conversation_id, user_id)
 );
 
 CREATE TABLE notifications (
