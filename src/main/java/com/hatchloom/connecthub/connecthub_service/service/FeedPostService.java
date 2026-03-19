@@ -54,8 +54,7 @@ public class FeedPostService {
             case "achievement" -> post = new AchievementPost(title, content, authorId);
             default -> throw new IllegalArgumentException("Invalid post type: " + request.postType());
         }
-        Post newPost = feedPostRepository.save(post);
-        return newPost;
+        return feedPostRepository.save(post);
 
     }
 
