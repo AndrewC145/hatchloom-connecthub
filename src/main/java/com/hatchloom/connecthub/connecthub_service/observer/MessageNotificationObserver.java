@@ -14,6 +14,7 @@ public class MessageNotificationObserver implements MessageObserver {
         this.notificationService = notificationService;
     }
 
+    // Method is only used for 1-on-1 messages, no group messages yet
     @Override
     public void update(Messages message, Integer receiverUserId) {
         notificationService.createNotification(new NotificationBuilder()
