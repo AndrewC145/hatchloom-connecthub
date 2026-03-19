@@ -3,6 +3,7 @@ package com.hatchloom.connecthub.connecthub_service.service;
 import com.hatchloom.connecthub.connecthub_service.dto.BasePostRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.UpdateClassifiedStatusRequest;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -189,9 +191,10 @@ class ClassifiedPostServiceTest {
 
         ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
 
+        UpdateClassifiedStatusRequest updateDto = new UpdateClassifiedStatusRequest(testUser.id, "filled");
         mockMvc.perform(put("/api/classified/{postId}/status", createdPost.getId())
-                .param("userId", String.valueOf(testUser.id))
-                .param("newStatus", "filled")
+                        .content(objectMapper.writeValueAsString(updateDto))
+                        .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf())
                 .with(user("testuser")))
                 .andExpect(status().isOk())

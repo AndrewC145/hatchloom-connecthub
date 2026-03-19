@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.UpdateClassifiedStatusRequest;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostService;
@@ -68,10 +69,9 @@ public class ClassifiedPostController {
     @PutMapping("/{postId}/status")
     public ResponseEntity<ClassifiedPost> updateClassifiedStatus(
             @PathVariable Integer postId,
-            @RequestBody Integer userId,
-            @RequestBody String newStatus) {
+            @RequestBody UpdateClassifiedStatusRequest request) {
         try {
-            ClassifiedPost updatedPost = classifiedPostService.updateClassifiedPostStatus(postId, userId, newStatus);
+            ClassifiedPost updatedPost = classifiedPostService.updateClassifiedPostStatus(postId, request.userId(), request.newStatus());
             return new ResponseEntity<>(updatedPost, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
