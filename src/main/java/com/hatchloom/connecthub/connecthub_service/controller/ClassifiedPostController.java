@@ -3,6 +3,7 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
+import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,11 @@ import java.util.List;
 @RequestMapping("/api/classified")
 public class ClassifiedPostController {
     private final ClassifiedPostService classifiedPostService;
+    private final ClassifiedPostFeed classifiedPostFeed;
 
-    public ClassifiedPostController(ClassifiedPostService classifiedPostService) {
+    public ClassifiedPostController(ClassifiedPostService classifiedPostService, ClassifiedPostFeed classifiedPostFeed) {
         this.classifiedPostService = classifiedPostService;
+        this.classifiedPostFeed = classifiedPostFeed;
     }
 
     @PostMapping()
@@ -75,5 +78,26 @@ public class ClassifiedPostController {
         }
     }
 
+    @PostMapping("/subscriptions")
+    public ResponseEntity<String> subscribe(@RequestParam Integer userId) {
+        try {
+            classifiedPostFeed.subscribe(userId);
+            return new ResponseEntity<>("Subscribed successfully", HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/subscriptions")
+    public ResponseEntity<String> unsubscribe(@RequestParam Integer userId) {
+        try {
+            classifiedPostFeed.unsubscribe(userId);
+            return new ResponseEntity<>("Unsubscribed successfully", HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }
