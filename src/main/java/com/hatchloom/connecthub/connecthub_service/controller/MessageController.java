@@ -1,11 +1,14 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
+import com.hatchloom.connecthub.connecthub_service.dto.MessageResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.SendMessageRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.SendMessageResponse;
 import com.hatchloom.connecthub.connecthub_service.service.MessageService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/message")
@@ -17,13 +20,24 @@ public class MessageController {
     }
 
     @PostMapping("/{recipientId}/send")
-    public ResponseEntity<Void> sendMessage(Integer conversationId, Integer senderId, @PathVariable Integer recipientId, String content) {
+    public ResponseEntity<SendMessageResponse> sendMessage(@PathVariable Integer recipientId, @RequestBody SendMessageRequest request) {
         try {
-            messageService.sendMessage(conversationId, senderId, recipientId, content);
-            return ResponseEntity.ok().build();
+            SendMessageResponse response = messageService.sendMessage(request.conversationId(), request.senderId(), recipientId, request.content());
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/conversation/{conversationId}")
+    public ResponseEntity<List<MessageResponse>> getConversationMessages(@PathVariable Integer conversationId, @RequestParam Integer userId) {
+        try {
+            List<MessageResponse> msgs = messageService.getConversationMessages(conversationId, userId);
+            return new ResponseEntity<>(msgs, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }
