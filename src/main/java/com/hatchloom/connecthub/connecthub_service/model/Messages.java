@@ -18,7 +18,7 @@ public class Messages {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "conversation_id", nullable = false, updatable = false)
     private Conversations conversation;
 
