@@ -1,7 +1,9 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
+import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,19 +19,19 @@ public class NotificationController {
     }
 
     @GetMapping("/{userId}/classified")
-    public ResponseEntity<List<Notification>> getClassifiedNotifications(@PathVariable Integer userId, @RequestParam boolean unread) {
-        return ResponseEntity.ok(notificationService.getClassifiedNotifications(userId, unread));
+    public ResponseEntity<List<NotificationResponse>> getClassifiedNotifications(@PathVariable Integer userId, @RequestParam boolean unread) {
+        return new ResponseEntity<>(notificationService.getClassifiedNotifications(userId, unread), HttpStatus.OK);
     }
 
     @GetMapping("/{userId}/messages")
-    public ResponseEntity<List<Notification>> getMessageNotifications(@PathVariable Integer userId, @RequestParam boolean unread) {
-        return ResponseEntity.ok(notificationService.getMessageNotifications(userId, unread));
+    public ResponseEntity<List<NotificationResponse>> getMessageNotifications(@PathVariable Integer userId, @RequestParam boolean unread) {
+        return new ResponseEntity<>(notificationService.getMessageNotifications(userId, unread), HttpStatus.OK);
     }
 
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Integer notificationId,
                                            @RequestBody Integer userId) {
         notificationService.markAsRead(notificationId, userId);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

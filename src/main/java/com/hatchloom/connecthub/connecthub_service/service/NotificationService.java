@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.builder.NotificationBuilder;
+import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 import com.hatchloom.connecthub.connecthub_service.repository.NotificationRepository;
@@ -23,30 +24,60 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getClassifiedNotifications(Integer userId, boolean unread) {
+    public List<NotificationResponse> getClassifiedNotifications(Integer userId, boolean unread) {
+        List<Notification> notifications;
         if (unread) {
-            return notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
+            notifications = notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
                     userId, NotificationType.CLASSIFIED_CREATED
             );
         }
         else {
-            return notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
+            notifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
                     userId, NotificationType.CLASSIFIED_CREATED
             );
         }
+
+        return notifications.stream().map(m -> new NotificationResponse(
+                m.getId(),
+                m.getRecipientUserId(),
+                m.getSenderUserId(),
+                m.getType(),
+                m.getMessage(),
+                m.getClassifiedPostId(),
+                m.getConversationId(),
+                m.getMessageId(),
+                m.isRead(),
+                m.getCreatedAt(),
+                m.getReadAt()
+        )).toList();
     }
 
-    public List<Notification> getMessageNotifications(Integer userId, boolean unread) {
+    public List<NotificationResponse> getMessageNotifications(Integer userId, boolean unread) {
+        List<Notification> msgNotifications;
         if (unread) {
-            return notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
+            msgNotifications = notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
                     userId, NotificationType.MESSAGE
             );
         }
         else {
-            return notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
+            msgNotifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
                     userId, NotificationType.MESSAGE
             );
         }
+
+        return msgNotifications.stream().map(m -> new NotificationResponse(
+                m.getId(),
+                m.getRecipientUserId(),
+                m.getSenderUserId(),
+                m.getType(),
+                m.getMessage(),
+                m.getClassifiedPostId(),
+                m.getConversationId(),
+                m.getMessageId(),
+                m.isRead(),
+                m.getCreatedAt(),
+                m.getReadAt()
+        )).toList();
     }
 
     public void markAsRead(Integer notificationId, Integer userId) {
