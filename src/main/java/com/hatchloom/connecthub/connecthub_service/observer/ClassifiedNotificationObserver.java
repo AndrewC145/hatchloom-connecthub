@@ -17,12 +17,13 @@ public class ClassifiedNotificationObserver implements ClassifiedObserver {
 
     @Override
     public void update(ClassifiedPost post, Integer receiverUserId) {
+        String shortenedTitle = post.getTitle().substring(0, Math.min(20, post.getTitle().length()));
         notificationService.createNotification(
                 new NotificationBuilder()
                 .setRecipientUserId(receiverUserId)
                 .setSenderUserId(post.getAuthor())
                 .setType(NotificationType.CLASSIFIED_CREATED)
-                .setMessage("New classified post: " + post.getTitle().substring(0, 20))
+                .setMessage("New classified post: " + shortenedTitle)
                 .setClassifiedPostId(post.getId()));
     }
 }
