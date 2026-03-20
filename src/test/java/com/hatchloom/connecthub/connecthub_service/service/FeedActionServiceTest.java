@@ -1,9 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
-import com.hatchloom.connecthub.connecthub_service.dto.BasePostRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.CommentRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.LikeRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.PostCreationRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.*;
 import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
 import com.hatchloom.connecthub.connecthub_service.model.FeedAction;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedActionRepository;
@@ -274,10 +271,10 @@ public class FeedActionServiceTest {
         Assertions.assertNotNull(comment);
         Assertions.assertEquals("This is a test comment", comment.getCommentText());
 
-
+        LikeCommentRequest likeDto = new LikeCommentRequest(testUser.id);
         mockMvc.perform(post("/api/feed/actions/comment/{commentId}/like", comment.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                .param("userId", String.valueOf(testUser.id))
+                .content(objectMapper.writeValueAsString(likeDto))
                 .with(csrf())
                 .with(user("testuser")))
                 .andExpect(status().isCreated());
@@ -301,9 +298,11 @@ public class FeedActionServiceTest {
         FeedAction comment = feedActionRepository.findByPostIdAndUserIdAndActionType(post.getId(), anotherUser.id, "comment").orElse(null);
         Assertions.assertNotNull(comment);
 
+        LikeCommentRequest likeDto = new LikeCommentRequest(testUser.id);
+
         mockMvc.perform(post("/api/feed/actions/comment/{commentId}/like", comment.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                .param("userId", String.valueOf(testUser.id))
+                        .content(objectMapper.writeValueAsString(likeDto))
                 .with(csrf())
                 .with(user("testuser")))
                 .andExpect(status().isCreated());
@@ -342,10 +341,11 @@ public class FeedActionServiceTest {
 
         FeedAction comment = feedActionRepository.findByPostIdAndUserIdAndActionType(post.getId(), anotherUser.id, "comment").orElse(null);
         Assertions.assertNotNull(comment);
+        LikeCommentRequest likeDto = new LikeCommentRequest(testUser.id);
 
         mockMvc.perform(post("/api/feed/actions/comment/{commentId}/like", comment.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("userId", String.valueOf(testUser.id))
+                        .content(objectMapper.writeValueAsString(likeDto))
                         .with(csrf())
                         .with(user("testuser")))
                 .andExpect(status().isCreated());
@@ -397,10 +397,11 @@ public class FeedActionServiceTest {
 
         FeedAction comment = feedActionRepository.findByPostIdAndUserIdAndActionType(post.getId(), anotherUser.id, "comment").orElse(null);
         Assertions.assertNotNull(comment);
+        LikeCommentRequest likeDto = new LikeCommentRequest(testUser.id);
 
         mockMvc.perform(post("/api/feed/actions/comment/{commentId}/like", comment.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("userId", String.valueOf(testUser.id))
+                        .content(objectMapper.writeValueAsString(likeDto))
                         .with(csrf())
                         .with(user("testuser")))
                 .andExpect(status().isCreated());

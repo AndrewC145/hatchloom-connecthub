@@ -1,9 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
-import com.hatchloom.connecthub.connecthub_service.dto.CommentRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.CommentResponse;
-import com.hatchloom.connecthub.connecthub_service.dto.LikeRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.PostActionsResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.*;
 import com.hatchloom.connecthub.connecthub_service.model.FeedAction;
 import com.hatchloom.connecthub.connecthub_service.service.FeedActionService;
 import jakarta.validation.Valid;
@@ -102,9 +99,9 @@ public class FeedActionController {
     @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<?> likeComment(
             @PathVariable Integer commentId,
-            @RequestParam Integer userId) {
+            @RequestBody LikeCommentRequest request) {
         try {
-            FeedAction like = feedActionService.likeComment(commentId, userId);
+            FeedAction like = feedActionService.likeComment(commentId, request.userId());
             return new ResponseEntity<>(like, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

@@ -6,7 +6,7 @@ import com.hatchloom.connecthub.connecthub_service.model.AchievementPost;
 import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
-import com.hatchloom.connecthub.connecthub_service.observer.PostFeed;
+import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
 import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
 import com.hatchloom.connecthub.connecthub_service.utils.PostCursorPayload;
@@ -19,12 +19,10 @@ import java.time.LocalDateTime;
 @Service
 public class FeedPostService {
     private final FeedPostRepository feedPostRepository;
-    private final PostFeed postFeed;
     private final CursorPaginationService cursorPaginationService;
 
-    public FeedPostService(FeedPostRepository feedPostRepository, PostFeed postFeed, CursorPaginationService cursorPaginationService) {
+    public FeedPostService(FeedPostRepository feedPostRepository, CursorPaginationService cursorPaginationService) {
         this.feedPostRepository = feedPostRepository;
-        this.postFeed = postFeed;
         this.cursorPaginationService = cursorPaginationService;
     }
 
@@ -56,9 +54,7 @@ public class FeedPostService {
             case "achievement" -> post = new AchievementPost(title, content, authorId);
             default -> throw new IllegalArgumentException("Invalid post type: " + request.postType());
         }
-        Post newPost = feedPostRepository.save(post);
-        postFeed.notifyObservers(newPost);
-        return newPost;
+        return feedPostRepository.save(post);
 
     }
 

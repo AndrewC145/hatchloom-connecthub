@@ -1,10 +1,11 @@
-
+DROP TABLE IF EXISTS classified_subscriptions CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS conversations CASCADE;
 DROP TABLE IF EXISTS feed_actions CASCADE;
 DROP TABLE IF EXISTS classified_posts CASCADE;
 DROP TABLE IF EXISTS posts CASCADE;
-DROP TABLE IF EXISTS conversations CASCADE;
-DROP TABLE IF EXISTS participants CASCADE;
-DROP TABLE IF EXISTS messages CASCADE;
+
 
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
@@ -47,7 +48,8 @@ CREATE TABLE conversations (
     user1_id INT NOT NULL,
     user2_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user1_id, user2_id)
+    UNIQUE (user1_id, user2_id),
+    CONSTRAINT check_user_order CHECK (user1_id < user2_id)
 );
 
 CREATE TABLE messages (
@@ -59,14 +61,27 @@ CREATE TABLE messages (
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 
-CREATE TABLE participants (
+CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,
-    conversation_id INT NOT NULL,
-    user_id INT NOT NULL,
-    last_read_message_id INT,
+    recipient_user_id INT NOT NULL,
+    sender_user_id INT NOT NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('MESSAGE', 'CLASSIFIED_CREATED')),
+    message TEXT NOT NULL,
+    classified_post_id INT,
+    conversation_id INT,
+    message_id INT,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP,
+    FOREIGN KEY (classified_post_id) REFERENCES classified_posts(id) ON DELETE CASCADE,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
-    FOREIGN KEY (last_read_message_id) REFERENCES messages(id) ON DELETE SET NULL,
-    UNIQUE (conversation_id, user_id)
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+);
+
+CREATE TABLE classified_subscriptions (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 

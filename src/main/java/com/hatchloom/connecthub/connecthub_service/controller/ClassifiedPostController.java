@@ -2,7 +2,10 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.SubscribeRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.UpdateClassifiedStatusRequest;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
+import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +17,11 @@ import java.util.List;
 @RequestMapping("/api/classified")
 public class ClassifiedPostController {
     private final ClassifiedPostService classifiedPostService;
+    private final ClassifiedPostFeed classifiedPostFeed;
 
-    public ClassifiedPostController(ClassifiedPostService classifiedPostService) {
+    public ClassifiedPostController(ClassifiedPostService classifiedPostService, ClassifiedPostFeed classifiedPostFeed) {
         this.classifiedPostService = classifiedPostService;
+        this.classifiedPostFeed = classifiedPostFeed;
     }
 
     @PostMapping()
@@ -65,15 +70,35 @@ public class ClassifiedPostController {
     @PutMapping("/{postId}/status")
     public ResponseEntity<ClassifiedPost> updateClassifiedStatus(
             @PathVariable Integer postId,
-            @RequestParam Integer userId,
-            @RequestParam String newStatus) {
+            @RequestBody UpdateClassifiedStatusRequest request) {
         try {
-            ClassifiedPost updatedPost = classifiedPostService.updateClassifiedPostStatus(postId, userId, newStatus);
+            ClassifiedPost updatedPost = classifiedPostService.updateClassifiedPostStatus(postId, request.userId(), request.newStatus());
             return new ResponseEntity<>(updatedPost, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
+    @PostMapping("/subscriptions")
+    public ResponseEntity<String> subscribe(@RequestBody SubscribeRequest request) {
+        try {
+            classifiedPostFeed.subscribe(request.userId());
+            return new ResponseEntity<>("Subscribed successfully", HttpStatus.CREATED);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/subscriptions")
+    public ResponseEntity<String> unsubscribe(@RequestParam Integer userId) {
+        try {
+            classifiedPostFeed.unsubscribe(userId);
+            return new ResponseEntity<>("Unsubscribed successfully", HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }

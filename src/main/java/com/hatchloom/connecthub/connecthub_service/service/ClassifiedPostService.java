@@ -3,6 +3,7 @@ package com.hatchloom.connecthub.connecthub_service.service;
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
+import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
 import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedCursorPayload;
 import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
@@ -16,10 +17,12 @@ import java.util.List;
 @Service
 public class ClassifiedPostService {
     private final ClassifiedPostRepository classifiedPostRepository;
+    private final ClassifiedPostFeed classifiedPostFeed;
     private final CursorPaginationService cursorPaginationService;
 
-    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, CursorPaginationService cursorPaginationService) {
+    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, ClassifiedPostFeed classifiedPostFeed, CursorPaginationService cursorPaginationService) {
         this.classifiedPostRepository = classifiedPostRepository;
+        this.classifiedPostFeed = classifiedPostFeed;
         this.cursorPaginationService = cursorPaginationService;
     }
 
@@ -29,14 +32,18 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Invalid classified post creation request");
         }
 
+        Integer authorId = request.basePost().authorId();
+
         ClassifiedPost post = new ClassifiedPost();
         post.setTitle(request.basePost().title());
         post.setContent(request.basePost().content());
-        post.setAuthor(request.basePost().authorId());
+        post.setAuthor(authorId);
         post.setProjectId(request.projectId());
         post.setStatus(request.status());
 
-        return classifiedPostRepository.save(post);
+        ClassifiedPost savedPost = classifiedPostRepository.save(post);
+        classifiedPostFeed.notifyObservers(savedPost, authorId);
+        return savedPost;
     }
 
     public ClassifiedPost getClassifiedById(Integer postId) {
