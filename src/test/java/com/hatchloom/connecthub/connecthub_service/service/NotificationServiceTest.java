@@ -1,9 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
-import com.hatchloom.connecthub.connecthub_service.dto.BasePostRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
-import com.hatchloom.connecthub.connecthub_service.dto.SubscribeRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.*;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
@@ -192,5 +189,71 @@ public class NotificationServiceTest {
         List<NotificationResponse> notifications3List = objectMapper.readValue(notifications3, new TypeReference<List<NotificationResponse>>() {});
 
         Assertions.assertEquals(0, notifications3List.size());
+    }
+
+    @Test
+    @DisplayName("Test messaging notifications are sent when a message is created")
+    void testMessageNotification() throws Exception {
+        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello");
+        mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .with(csrf())
+                .with(user(sender.name)))
+                .andExpect(status().isCreated());
+
+        Assertions.assertEquals(1, notificationRepository.count());
+        List<Notification> notifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(recipient.id, NotificationType.MESSAGE);
+        Assertions.assertEquals(1, notifications.size());
+
+        MvcResult res = mockMvc.perform(get("/api/notifications/{userId}/messages", recipient.id)
+                .param("unread", "true")
+                .with(user(recipient.name))
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String notificationsStr = res.getResponse().getContentAsString();
+        List<NotificationResponse> notificationsList = objectMapper.readValue(notificationsStr, new TypeReference<List<NotificationResponse>>() {});
+        Assertions.assertEquals(1, notificationsList.size());
+    }
+
+    @Test
+    @DisplayName("Test that a user cannot mark another user's notification as read")
+    void testMarkNotificationAsReadUnauthorized() throws Exception {
+        SubscribeRequest dto = new SubscribeRequest(recipient.id);
+        SubscribeRequest dto2 = new SubscribeRequest(thirdUser.id);
+        mockMvc.perform(post("/api/classified/subscriptions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .with(csrf())
+                        .with(user(recipient.name)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/classified/subscriptions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto2))
+                        .with(csrf())
+                        .with(user(thirdUser.name)))
+                .andExpect(status().isCreated());
+
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post", sender.id), project.id, "open");
+        mockMvc.perform(post("/api/classified")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(csrf())
+                        .with(user(sender.name)))
+                .andExpect(status().isCreated());
+
+
+        List<Notification> notifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(recipient.id, NotificationType.CLASSIFIED_CREATED);
+        Integer notificationId = notifications.getFirst().getId();
+
+        mockMvc.perform(patch("/api/notifications/{notificationId}/read", notificationId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(thirdUser.id))
+                .with(csrf())
+                .with(user(thirdUser.name)))
+                .andExpect(status().isBadRequest());
     }
 }

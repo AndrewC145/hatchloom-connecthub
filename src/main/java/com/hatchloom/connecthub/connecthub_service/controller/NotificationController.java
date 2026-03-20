@@ -29,9 +29,14 @@ public class NotificationController {
     }
 
     @PatchMapping("/{notificationId}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Integer notificationId,
+    public ResponseEntity<String> markAsRead(@PathVariable Integer notificationId,
                                            @RequestBody Integer userId) {
-        notificationService.markAsRead(notificationId, userId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        try {
+            notificationService.markAsRead(notificationId, userId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
