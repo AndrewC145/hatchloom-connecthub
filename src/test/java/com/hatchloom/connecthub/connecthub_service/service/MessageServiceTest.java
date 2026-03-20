@@ -56,7 +56,7 @@ public class MessageServiceTest {
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf())
                 .with(user(sender.name)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("conversationId").exists())
                 .andExpect(jsonPath("messageId").exists())
                 .andExpect(jsonPath("senderId").value(sender.id))
@@ -138,7 +138,7 @@ public class MessageServiceTest {
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
                         .with(user(sender.name)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
 
         mockMvc.perform(get("/api/message/conversation/{conversationId}", 1)
@@ -159,7 +159,7 @@ public class MessageServiceTest {
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
                         .with(user(sender.name)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         SendMessageRequest invalidRequest = new SendMessageRequest(1, outsider.id, "Hi");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
@@ -181,7 +181,7 @@ public class MessageServiceTest {
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
                         .with(user(sender.name)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         SendMessageRequest request2 = new SendMessageRequest(1, recipient.id, "Hi there");
         mockMvc.perform(post("/api/message/{recipientId}/send", sender.id)
@@ -189,7 +189,7 @@ public class MessageServiceTest {
                         .content(objectMapper.writeValueAsString(request2))
                         .with(csrf())
                         .with(user(recipient.name)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/message/conversation/{conversationId}", 1)
                 .param("userId", sender.id.toString())

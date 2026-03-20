@@ -23,7 +23,7 @@ public class MessageController {
     public ResponseEntity<SendMessageResponse> sendMessage(@PathVariable Integer recipientId, @RequestBody SendMessageRequest request) {
         try {
             SendMessageResponse response = messageService.sendMessage(request.conversationId(), request.senderId(), recipientId, request.content());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
