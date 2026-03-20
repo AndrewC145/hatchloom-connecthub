@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.SubscribeRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.UpdateClassifiedStatusRequest;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
@@ -79,10 +80,10 @@ public class ClassifiedPostController {
     }
 
     @PostMapping("/subscriptions")
-    public ResponseEntity<String> subscribe(@RequestBody Integer userId) {
+    public ResponseEntity<String> subscribe(@RequestBody SubscribeRequest request) {
         try {
-            classifiedPostFeed.subscribe(userId);
-            return new ResponseEntity<>("Subscribed successfully", HttpStatus.OK);
+            classifiedPostFeed.subscribe(request.userId());
+            return new ResponseEntity<>("Subscribed successfully", HttpStatus.CREATED);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
