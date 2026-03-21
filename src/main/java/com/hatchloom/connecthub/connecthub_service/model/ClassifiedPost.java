@@ -37,6 +37,9 @@ public class ClassifiedPost {
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
 
+    @Column(name = "assigned_to", nullable = true)
+    private Integer assignedTo;
+
     @Column(nullable = false, length = 20)
     private String status = String.valueOf(ClassifiedStatus.OPEN);
 

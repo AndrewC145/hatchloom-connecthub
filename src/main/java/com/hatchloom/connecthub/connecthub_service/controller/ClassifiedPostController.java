@@ -1,10 +1,8 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
-import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
-import com.hatchloom.connecthub.connecthub_service.dto.SubscribeRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.UpdateClassifiedStatusRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.*;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
+import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPostApplication;
 import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostService;
 import org.springframework.http.HttpStatus;
@@ -102,6 +100,38 @@ public class ClassifiedPostController {
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{postId}/apply")
+    public ResponseEntity<String> applyToClassified(@PathVariable Integer postId, @RequestBody ClassifiedApplicationDTO request) {
+        try {
+            classifiedPostService.applyToClassifiedPost(postId, request.userId());
+            return new ResponseEntity<>("Application submitted successfully", HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{postId}/applications")
+    public ResponseEntity<List<ClassifiedPostApplication>> getApplications(@PathVariable Integer postId, @RequestParam Integer userId) {
+        try {
+            List<ClassifiedPostApplication> applications = classifiedPostService.getApplicationsForClassifiedPost(postId, userId);
+            return new ResponseEntity<>(applications, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+    @GetMapping("/applications/me")
+    public ResponseEntity<List<ClassifiedPost>> getMyApplications(@RequestParam Integer userId) {
+        try {
+            List<ClassifiedPost> posts = classifiedPostService.getAppliedClassifiedPostsByUser(userId);
+            return new ResponseEntity<>(posts, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 

@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS conversations CASCADE;
 DROP TABLE IF EXISTS feed_actions CASCADE;
+DROP TABLE IF EXISTS classified_post_applications CASCADE;
 DROP TABLE IF EXISTS classified_posts CASCADE;
 DROP TABLE IF EXISTS posts CASCADE;
 
@@ -22,9 +23,20 @@ CREATE TABLE classified_posts (
     content TEXT NOT NULL,
     author INT NOT NULL,
     project_id INT NOT NULL,
+    assigned_to INT,
     status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'filled', 'closed')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE classified_post_applications (
+    id SERIAL PRIMARY KEY,
+    classified_post_id INT NOT NULL,
+    applicant_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'applied' CHECK (status IN ('applied', 'accepted', 'rejected')),
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (classified_post_id) REFERENCES classified_posts(id) ON DELETE CASCADE,
+    UNIQUE(classified_post_id, applicant_id)
 );
 
 CREATE TABLE feed_actions (
