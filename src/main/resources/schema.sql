@@ -33,10 +33,10 @@ CREATE TABLE classified_post_applications (
     id SERIAL PRIMARY KEY,
     classified_post_id INT NOT NULL,
     applicant_id INT NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'applied' CHECK (status IN ('applied', 'accepted', 'rejected')),
+    status VARCHAR(20) NOT NULL DEFAULT 'APPLIED' CHECK (status IN ('APPLIED', 'ACCEPTED', 'REJECTED')),
     applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (classified_post_id) REFERENCES classified_posts(id) ON DELETE CASCADE,
-    UNIQUE(classified_post_id, applicant_id)
+    UNIQUE(classified_post_id, applicant_id),
+    FOREIGN KEY (classified_post_id) REFERENCES classified_posts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE feed_actions (

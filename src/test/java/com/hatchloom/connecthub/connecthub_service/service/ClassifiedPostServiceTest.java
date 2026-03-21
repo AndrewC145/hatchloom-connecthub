@@ -1,10 +1,8 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
-import com.hatchloom.connecthub.connecthub_service.dto.BasePostRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
-import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
-import com.hatchloom.connecthub.connecthub_service.dto.UpdateClassifiedStatusRequest;
+import com.hatchloom.connecthub.connecthub_service.dto.*;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
+import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostApplicationRepository;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,14 +36,21 @@ class ClassifiedPostServiceTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ClassifiedPostApplicationRepository classifiedPostApplicationRepository;
+
     private BaseUser testUser;
+    private BaseUser testUser2;
     private BaseProject testProject;
+
 
     @BeforeEach
     void setup() {
         classifiedPostRepository.deleteAll();
+        classifiedPostApplicationRepository.deleteAll();
         testUser = new BaseUser(1, "testuser", "test@gmail.com");
         testProject = new BaseProject(1, "Test Project", "A project for testing", testUser, List.of());
+        testUser2 = new BaseUser(2, "testuser2", "test2@gmail.com");
     }
 
     @Test
@@ -320,4 +325,142 @@ class ClassifiedPostServiceTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("Test applying to a classified post")
+    void testApplyClassifiedPost() throws Exception {
+        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
+                "This is a classified test", testUser.id), testProject.id, "open");
+
+        String response = mockMvc.perform(post("/api/classified")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .with(csrf())
+                .with(user("testuser")))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
+        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
+        mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(applicationDTO))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(applicationDTO))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isBadRequest());
+
+        Assertions.assertEquals(1, classifiedPostApplicationRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test applying to a classified post that is not open")
+    void testApplyClassifiedPostInvalidStatus() throws Exception {
+        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
+                "This is a classified test", testUser.id), testProject.id, "filled");
+
+        String response = mockMvc.perform(post("/api/classified")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .with(csrf())
+                        .with(user("testuser")))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
+        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
+        mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(applicationDTO))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Test applying to a classified post that doesn't exist")
+    void testApplyClassifiedPostInvalidPost() throws Exception {
+        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
+        mockMvc.perform(post("/api/classified/{postId}/apply", 999)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(applicationDTO))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isBadRequest());
+
+        Assertions.assertEquals(0, classifiedPostApplicationRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test get all applications for a classified post")
+    void testGetClassifiedPostApplications() throws Exception {
+        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
+                "This is a classified test", testUser.id), testProject.id, "open");
+
+        String response = mockMvc.perform(post("/api/classified")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .with(csrf())
+                        .with(user("testuser")))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
+        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
+        mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(applicationDTO))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/classified/{postId}/applications", createdPost.getId())
+                        .param("userId", String.valueOf(testUser.id))
+                        .with(csrf())
+                        .with(user("testuser")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+
+    }
+
+    @Test
+    @DisplayName("Test get applications for a user")
+    void testGetUserApplications() throws Exception {
+        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
+                "This is a classified test", testUser.id), testProject.id, "open");
+
+        String response = mockMvc.perform(post("/api/classified")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .with(csrf())
+                        .with(user("testuser")))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
+        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
+        mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(applicationDTO))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/classified/applications/me")
+                        .param("userId", String.valueOf(testUser2.id))
+                        .with(csrf())
+                        .with(user("testuser2")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
 }

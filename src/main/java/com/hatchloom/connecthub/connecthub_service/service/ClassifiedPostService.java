@@ -236,7 +236,7 @@ public class ClassifiedPostService {
      * Retrieves all applications for a specific classified post
      * @param postId the post ID of the classified post to retrieve applications for
      * @param userId the user ID of the author requesting the applications
-     * @return
+     * @return a list of ClassifiedPostApplications
      */
     public List<ClassifiedPostApplication> getApplicationsForClassifiedPost(Integer postId, Integer userId) {
         validatePostParams(postId, userId);

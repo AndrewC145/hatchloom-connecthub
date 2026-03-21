@@ -30,8 +30,9 @@ public class ClassifiedPostApplication {
     @Column(name = "applicant_id", nullable = false)
     private Integer applicantId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ApplicationStatus status;
+    private ApplicationStatus status = ApplicationStatus.APPLIED;
 
     @CreationTimestamp
     @Column(name = "applied_at", nullable = false, updatable = false)
