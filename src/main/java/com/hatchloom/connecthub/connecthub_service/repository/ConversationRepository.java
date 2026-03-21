@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
+/**
+ * Repository interface for managing Conversations entities
+ */
 public interface ConversationRepository extends JpaRepository<Conversations, Integer> {
     Optional<Conversations> findByUser1IdAndUser2Id(Integer user1Id, Integer user2Id);
 }

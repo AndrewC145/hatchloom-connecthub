@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing feed actions such as likes and comments on posts
+ */
 @Service
 public class FeedActionService {
     private final FeedActionRepository feedActionRepository;
@@ -26,6 +29,10 @@ public class FeedActionService {
         this.feedPostRepository = feedPostRepository;
     }
 
+    /**
+     * Implementation for liking a post
+     * @param request the like request containing post ID and user ID
+     */
     @Transactional
     public void likePost(LikeRequest request) {
         Post post = feedPostRepository.getPostById(request.postId());
@@ -49,6 +56,11 @@ public class FeedActionService {
         feedActionRepository.save(like);
     }
 
+    /**
+     * Implementation for unliking a post
+     * @param postId the ID of the post to unlike
+     * @param userId the ID of the user unliking the post
+     */
     @Transactional
     public void unlikePost(Integer postId, Integer userId) {
         Optional<FeedAction> existingLike = feedActionRepository.findByPostIdAndUserIdAndActionType(
@@ -61,6 +73,10 @@ public class FeedActionService {
         feedActionRepository.delete(existingLike.get());
     }
 
+    /**
+     * Implementation for adding a comment to a post
+      * @param request the request containing post ID, user ID, and comment text
+     */
     @Transactional
     public void addComment(CommentRequest request) {
         Post post = feedPostRepository.getPostById(request.postId());
@@ -82,6 +98,11 @@ public class FeedActionService {
         feedActionRepository.save(comment);
     }
 
+    /**
+     * Implementation for deleting a comment
+     * @param commentId the ID of the comment to delete
+     * @param userId the ID of the user attempting to delete the comment
+     */
     @Transactional
     public void deleteComment(Integer commentId, Integer userId) {
         Optional<FeedAction> comment = feedActionRepository.findByIdAndUserIdAndActionType(
@@ -99,6 +120,12 @@ public class FeedActionService {
         feedActionRepository.delete(comment.get());
     }
 
+    /**
+     * Implementation for liking a comment
+     * @param commentId the comment ID to like
+     * @param userId the user ID of the person wanting to like the comment
+     * @return the created like action
+     */
     @Transactional
     public FeedAction likeComment(Integer commentId, Integer userId) {
         FeedAction comment = feedActionRepository.getFeedActionById(commentId);
@@ -122,6 +149,11 @@ public class FeedActionService {
         return feedActionRepository.save(commentLike);
     }
 
+    /**
+     * Implementation for unliking a comment
+     * @param commentId the comment ID to unlike
+     * @param userId the user ID of the person who wants to unlike the comment
+     */
     @Transactional
     public void unlikeComment(Integer commentId, Integer userId) {
         Optional<FeedAction> existingLike = feedActionRepository.findByParentActionIdAndUserIdAndActionType(
@@ -134,10 +166,21 @@ public class FeedActionService {
         feedActionRepository.delete(existingLike.get());
     }
 
+    /**
+     * Implementation for retrieving the number of likes for a comment
+     * @param commentId the comment ID to fetch
+     * @return the number of likes for the comment
+     */
     public Long getCommentLikesCount(Integer commentId) {
         return feedActionRepository.countLikesByCommentId(commentId);
     }
 
+    /**
+     * Implementation for retrieving post actions for a post ID
+     * @param postId the post ID for which to retrieve actions
+     * @param currentUserId the current user ID to check if they have liked the post
+     * @return a PostActionsResponse containing the number of likes and comments, the list of comments, and whether the current user has liked the post
+     */
     public PostActionsResponse getPostActions(Integer postId, Integer currentUserId) {
         Post post = feedPostRepository.getPostById(postId);
         if (post == null) {
@@ -166,6 +209,11 @@ public class FeedActionService {
         return new PostActionsResponse(postId, likesCount, commentsCount, comments, isLikedByCurrentUser);
     }
 
+    /**
+     * Implementation for retrieving comments for a post ID
+     * @param postId the post ID to fetch comments for
+     * @return the list of comments
+     */
     public List<CommentResponse> getCommentsByPostId(Integer postId) {
         List<FeedAction> commentActions = feedActionRepository.findCommentsByPostId(postId);
         return commentActions.stream()
@@ -179,6 +227,11 @@ public class FeedActionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Implementation for retrieving the number of likes for a post
+     * @param postId the post ID to fetch likes count for
+     * @return the number of likes for the post
+     */
     public Long getLikesCount(Integer postId) {
         return feedActionRepository.countLikesByPostId(postId);
     }

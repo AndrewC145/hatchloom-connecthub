@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing feed actions such as liking/unliking posts and comments,
+ * adding/deleting comments, and retrieving post actions and comments.
+ */
 @RestController
 @RequestMapping("/api/feed/actions")
 public class FeedActionController {

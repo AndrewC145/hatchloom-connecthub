@@ -10,6 +10,10 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing feed actions, which can be
+ * likes or comments on posts
+ */
 @Entity
 @Table(name = "feed_actions")
 @Data

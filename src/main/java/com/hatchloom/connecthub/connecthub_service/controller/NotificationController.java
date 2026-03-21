@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for retrieving notifications for messages and classified posts,
+ * and marking notifications as read
+ */
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
@@ -33,7 +37,7 @@ public class NotificationController {
                                            @RequestBody Integer userId) {
         try {
             notificationService.markAsRead(notificationId, userId);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>("Notification marked as read", HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

@@ -4,6 +4,9 @@ import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import org.springframework.stereotype.Component;
 
+/**
+ * Factory for creating announcementPost objects
+ */
 @Component("announcementFactory")
 public class AnnouncementFactory extends PostFactory {
     @Override

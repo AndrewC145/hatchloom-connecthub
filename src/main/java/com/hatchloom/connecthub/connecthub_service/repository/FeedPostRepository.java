@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Repository interface for managing feed posts entities
+ */
 public interface FeedPostRepository extends JpaRepository<Post, Integer> {
         Post getPostById(Integer id);
 

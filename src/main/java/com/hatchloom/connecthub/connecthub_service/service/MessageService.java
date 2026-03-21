@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for handling message functionality
+ */
 @Service
 public class MessageService {
     private final MessageNotificationObserver messageNotificationObserver;
@@ -28,6 +31,14 @@ public class MessageService {
         this.conversationRepository = conversationRepository;
     }
 
+    /**
+     * Sends a message from sender to the recipient
+     * @param conversationId the conversation ID
+     * @param senderId the sender's user ID
+     * @param recipientId the recipient's user ID
+     * @param content the message text
+     * @return a SendMessageResponse containing message details
+     */
     @Transactional
     public SendMessageResponse sendMessage(Integer conversationId, Integer senderId, Integer recipientId, String content) {
         if (!validateInputs(senderId, recipientId, content)) {
@@ -59,6 +70,13 @@ public class MessageService {
         return new SendMessageResponse(c.getId(), savedMessage.getId(), lesserId, greaterId, savedMessage.getContent(), savedMessage.getCreatedAt());
     }
 
+    /**
+     * Get an existing conversation between sender and recipient,
+     * or create a new one if null
+     * @param senderId the sender user ID
+     * @param recipientId the recipient user ID
+     * @return the existing or newly created Conversations object
+     */
     public Conversations getOrCreateConversation(Integer senderId, Integer recipientId) {
         Integer lesserId = Math.min(senderId, recipientId);
         Integer greaterId = Math.max(senderId, recipientId);
@@ -74,10 +92,23 @@ public class MessageService {
         }
     }
 
+    /**
+     * Validates the inputs for sending a message
+     * @param senderId the sender user ID
+     * @param recipientId the recipient user ID
+     * @param content the message content
+     * @return true if inputs are valid, false otherwise
+     */
     public boolean validateInputs(Integer senderId, Integer recipientId, String content) {
         return senderId != null && recipientId != null && !senderId.equals(recipientId) && content != null && !content.trim().isEmpty();
     }
 
+    /**
+     * Retrieves all messages in a conversation for a user
+     * @param conversationId the conversation ID to fetch
+     * @param userId the user ID of the requester
+     * @return a list of MessageResponse objects containing message details
+     */
     public List<MessageResponse> getConversationMessages(Integer conversationId, Integer userId) {
         Conversations conversation = conversationRepository.findById(conversationId).orElseThrow(() -> new IllegalArgumentException("Conversation not found with id: " + conversationId));
 

@@ -8,6 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a conversation between two users
+ */
 @Entity
 @Table(name = "conversations", uniqueConstraints = {@UniqueConstraint(name = "unique_conversation",
         columnNames = {"user1_id", "user2_id"})})

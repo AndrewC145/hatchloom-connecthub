@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing feed posts, and
+ * retrieving posts with pagination
+ */
 @RestController
 @RequestMapping("/api/feed")
 public class FeedPostController {

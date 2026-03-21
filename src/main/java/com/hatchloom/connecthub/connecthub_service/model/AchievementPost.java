@@ -8,6 +8,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity representing an achievement post, a
+ * specific type of post that can be created by users to share an achievement.
+ */
 @Entity
 @DiscriminatorValue("achievement")
 @Data

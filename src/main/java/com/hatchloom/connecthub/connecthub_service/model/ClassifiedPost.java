@@ -10,6 +10,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a classified post,
+ * a specific type of post that can be created by users for a project Id,
+ * similar to a job posting
+ */
 @Entity
 @Table(name = "classified_posts")
 @Data
@@ -31,6 +36,9 @@ public class ClassifiedPost {
 
     @Column(name = "project_id", nullable = false)
     private Integer projectId;
+
+    @Column(name = "assigned_to", nullable = true)
+    private Integer assignedTo;
 
     @Column(nullable = false, length = 20)
     private String status = String.valueOf(ClassifiedStatus.OPEN);

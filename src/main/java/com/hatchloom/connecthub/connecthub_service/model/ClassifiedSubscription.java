@@ -8,6 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a classified subscription, which allows users to subscribe to classified posts
+ */
 @Entity
 @Table(name = "classified_subscriptions")
 @Data

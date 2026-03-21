@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing messages, including sending messages and retrieving conversation messages.
+ */
 @RestController
 @RequestMapping("/api/message")
 public class MessageController {
