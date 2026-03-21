@@ -3,6 +3,9 @@ package com.hatchloom.connecthub.connecthub_service.builder;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 
+/**
+ * Concrete builder class for creating Notification objects
+ */
 public class NotificationBuilder implements Builder {
     private Integer recipientUserId;
     private Integer senderUserId;
@@ -54,6 +57,10 @@ public class NotificationBuilder implements Builder {
         return this;
     }
 
+    /**
+     * Builds and return a Notification object
+     * @return Notification
+     */
     @Override
     public Notification build() {
         if (recipientUserId == null || senderUserId == null || type == null || message == null) {

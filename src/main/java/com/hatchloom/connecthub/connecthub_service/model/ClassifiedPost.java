@@ -10,6 +10,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a classified post,
+ * a specific type of post that can be created by users for a project Id,
+ * similar to a job posting
+ */
 @Entity
 @Table(name = "classified_posts")
 @Data

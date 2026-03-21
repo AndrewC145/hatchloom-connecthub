@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service for managing notifications
+ */
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
@@ -19,11 +22,22 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
+    /**
+     * Creates a notification using the builder design pattern
+     * and save it to the database
+     * @param builder the notification builder
+     */
     public void createNotification(NotificationBuilder builder) {
         Notification notification = builder.build();
         notificationRepository.save(notification);
     }
 
+    /**
+     * Getting classified notifications for the user
+     * @param userId the user ID
+     * @param unread whether to get only unread notifications or all notifications
+     * @return a list of notification responses
+     */
     public List<NotificationResponse> getClassifiedNotifications(Integer userId, boolean unread) {
         List<Notification> notifications;
         if (unread) {
@@ -52,6 +66,12 @@ public class NotificationService {
         )).toList();
     }
 
+    /**
+     * Getting message notifications for the user
+     * @param userId the user ID
+     * @param unread whether to get only unread message notifications or all message notifications
+     * @return a list of notification responses
+     */
     public List<NotificationResponse> getMessageNotifications(Integer userId, boolean unread) {
         List<Notification> msgNotifications;
         if (unread) {
@@ -80,6 +100,11 @@ public class NotificationService {
         )).toList();
     }
 
+    /**
+     * Marks a notification as read
+     * @param notificationId the notification ID to mark as read
+     * @param userId the user ID of the recipient of the notification
+     */
     public void markAsRead(Integer notificationId, Integer userId) {
         Optional<Notification> notification = Optional.of(notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("Notification does not exist")));

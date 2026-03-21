@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing Messages entities
+ */
 public interface MessageRepository extends JpaRepository<Messages, Integer> {
     @Query("SELECT m FROM Messages m WHERE m.conversation.id = :conversationId ORDER BY m.createdAt ASC")
     List<Messages> findByConversationIdOrderByCreatedAtAsc(Integer conversationId);

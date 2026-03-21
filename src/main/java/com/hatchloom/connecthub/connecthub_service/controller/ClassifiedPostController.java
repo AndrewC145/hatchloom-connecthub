@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing classified posts,
+ * updating status, and handling subscriptions to the classified post feed.
+ */
 @RestController
 @RequestMapping("/api/classified")
 public class ClassifiedPostController {

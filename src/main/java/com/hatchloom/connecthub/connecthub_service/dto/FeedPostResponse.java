@@ -2,6 +2,15 @@ package com.hatchloom.connecthub.connecthub_service.dto;
 
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 
+/**
+ * DTO for handling feed post responses
+ * @param id
+ * @param title
+ * @param content
+ * @param author
+ * @param postType
+ * @param createdAt
+ */
 public record FeedPostResponse(
         Integer id,
         String title,

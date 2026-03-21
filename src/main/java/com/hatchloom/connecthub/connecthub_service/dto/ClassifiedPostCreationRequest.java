@@ -4,6 +4,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * DTO for handling classified post creation requests,
+ * using base post fields
+ * @param basePost
+ * @param projectId
+ * @param status
+ */
 public record ClassifiedPostCreationRequest(
         @Valid @NotNull BasePostRequest basePost,
         @NotNull(message = "Project ID must not be null") Integer projectId,

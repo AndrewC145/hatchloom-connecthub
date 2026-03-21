@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing ClassifiedSubscription entities
+ */
 public interface ClassifiedSubscriptionRepository extends JpaRepository<ClassifiedSubscription, Integer> {
     @Query("SELECT s.userId FROM ClassifiedSubscription s")
     List<Integer> findAllUserIds();

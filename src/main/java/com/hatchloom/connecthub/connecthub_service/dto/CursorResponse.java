@@ -7,6 +7,7 @@ import java.util.List;
 @Getter
 @Setter
 public class CursorResponse<T> {
+    // Generic DTO for handling paginated responses with cursor-based pagination
     private List<T> data;
     private String nextCursor;
     private boolean hasNext;

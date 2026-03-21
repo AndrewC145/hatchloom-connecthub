@@ -9,6 +9,10 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a notification sent to a user,
+ * triggered by classified post updates, or new messages
+ */
 @Entity
 @Table(name = "notifications")
 @Data

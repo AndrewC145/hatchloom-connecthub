@@ -8,6 +8,10 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Abstract base class representing a post,
+ * extended by specific post types
+ */
 @Entity
 @Table(name = "posts")
 @DiscriminatorColumn(name = "post_type", discriminatorType = DiscriminatorType.STRING)

@@ -4,6 +4,9 @@ import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
 import org.springframework.stereotype.Component;
 
+/**
+ * Factory for creating SharePost objects
+ */
 @Component("shareFactory")
 public class ShareFactory extends PostFactory {
     @Override

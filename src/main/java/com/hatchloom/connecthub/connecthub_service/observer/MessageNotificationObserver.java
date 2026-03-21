@@ -6,6 +6,9 @@ import com.hatchloom.connecthub.connecthub_service.model.Messages;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
 import org.springframework.stereotype.Component;
 
+/**
+ * Observer implementation that listens for new messages and creates notifications for the recipients
+ */
 @Component
 public class MessageNotificationObserver implements MessageObserver {
     private final NotificationService notificationService;
@@ -14,7 +17,11 @@ public class MessageNotificationObserver implements MessageObserver {
         this.notificationService = notificationService;
     }
 
-    // Method is only used for 1-on-1 messages, no group messages yet
+    /**
+     * When a new message is received, create a notification for the recipient user
+     * @param message the incoming message that triggered the notification
+     * @param receiverUserId the ID of the user who should receive the notification
+     */
     @Override
     public void update(Messages message, Integer receiverUserId) {
         notificationService.createNotification(new NotificationBuilder()

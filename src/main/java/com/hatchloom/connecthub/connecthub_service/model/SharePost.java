@@ -3,6 +3,10 @@ package com.hatchloom.connecthub.connecthub_service.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Entity representing a share post, a specific type of post
+ * that can be created by users to share content
+ */
 @Entity
 @DiscriminatorValue("share")
 @Data

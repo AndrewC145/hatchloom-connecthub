@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository interface for managing feed action entities
+ */
 public interface FeedActionRepository extends JpaRepository<FeedAction, Integer> {
     FeedAction getFeedActionById(Integer id);
 

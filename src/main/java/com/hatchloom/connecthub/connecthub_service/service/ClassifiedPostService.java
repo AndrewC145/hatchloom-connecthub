@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// Service class for managing classified posts, including creation, retrieval, filtering, and status updates.
-// Base implementation for now, pagination and user authorization will be added later
+/**
+ * Service class for managing classified posts, including creation,
+ * retrieval, status updates, and cursor-based pagination
+ */
 @Service
 public class ClassifiedPostService {
     private final ClassifiedPostRepository classifiedPostRepository;
@@ -27,6 +29,11 @@ public class ClassifiedPostService {
     }
 
 
+    /**
+     * Creates a new classified post based on the provided request
+     * @param request the incoming request containing the details
+     * @return the created ClassifiedPost entity
+     */
     public ClassifiedPost createClassifiedPost(ClassifiedPostCreationRequest request) {
         if (validateClassifiedRequest(request)) {
             throw new IllegalArgumentException("Invalid classified post creation request");
@@ -46,6 +53,11 @@ public class ClassifiedPostService {
         return savedPost;
     }
 
+    /**
+     * Retrieves a classified post by its ID
+     * @param postId the ID of the classified post to retrieve
+     * @return the ClassifiedPost entity with the specified ID
+     */
     public ClassifiedPost getClassifiedById(Integer postId) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
@@ -60,6 +72,11 @@ public class ClassifiedPostService {
         return classifiedPostRepository.getClassifiedPostById(postId).orElseThrow(() -> new IllegalArgumentException("Post with ID " + postId + " does not exist"));
     }
 
+    /**
+     * Filters classified posts based on their status (open, filled, closed)
+     * @param status the status to filter by
+     * @return a list of classified posts with the status
+     */
     public List<ClassifiedPost> filterClassifiedPostsByStatus(String status) {
         if (validateStatus(status)) {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
@@ -69,10 +86,22 @@ public class ClassifiedPostService {
         return classifiedPostRepository.findByStatus(normalizedStatus);
     }
 
+    /**
+     * Validates the status input to ensure it is either "open", "filled", or "closed"
+     * @param status the status string to validate
+     * @return a boolean whether the status is valid or not
+     */
     private boolean validateStatus(String status) {
         return status == null || (!status.equals("open") && !status.equals("filled") && !status.equals("closed"));
     }
 
+    /**
+     * Updates the status of a classified post
+     * @param postId the post ID of the classified post to update
+     * @param userId The user ID of the author
+     * @param newStatus the new status to set
+     * @return the updated ClassifiedPost entity
+     */
     public ClassifiedPost updateClassifiedPostStatus(Integer postId, Integer userId, String newStatus) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
@@ -93,6 +122,13 @@ public class ClassifiedPostService {
     }
 
 
+    /**
+     * Retrieves all classified posts with cursor-based pagination, filtered by status
+     * @param after the cursor indicating the next start point for pagination
+     * @param limit the max number of posts to return
+     * @param status the status to filter by
+     * @return a CursorResponse containing the paginated list of classified posts
+     */
     public CursorResponse<ClassifiedPost> getAllClassifiedPosts(String after, Integer limit, String status) {
         if (validateStatus(status)) {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
@@ -109,6 +145,11 @@ public class ClassifiedPostService {
                 );
     }
 
+    /**
+     * Validates the classified post creation request
+     * @param request the incoming request
+     * @return a boolean indicating whether or not the request is valid
+     */
     private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request must not be null");

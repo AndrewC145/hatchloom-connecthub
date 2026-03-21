@@ -8,6 +8,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity representing an announcement post,
+ * a specific type of post that can be created by users to share an announcement.
+ */
 @Entity
 @DiscriminatorValue("announcement")
 @Data

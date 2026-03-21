@@ -8,6 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a message in a conversation between two users
+ */
 @Entity
 @Table(name = "messages")
 @Data

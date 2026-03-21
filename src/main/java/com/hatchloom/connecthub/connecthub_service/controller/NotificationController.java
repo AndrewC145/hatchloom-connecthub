@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for retrieving notifications for messages and classified posts,
+ * and marking notifications as read
+ */
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
