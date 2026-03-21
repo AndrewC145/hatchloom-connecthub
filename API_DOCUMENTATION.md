@@ -12,7 +12,8 @@ classified posts which are to be part of the Launchpad service.
 - Manage classified posts for Launchpad
 - Filtering classified posts status
 - Integrate with other services such as User Service and Launchpad
-- Future support for pagination for posts
+- Pagination support
+- Notification system for classified post updates and messages
 
 ---
 
@@ -20,6 +21,8 @@ classified posts which are to be part of the Launchpad service.
 1. [Feed Post Service](#feed-post-service)
 2. [Classified Post Service](#classified-post-service)
 3. [Feed Action Service](#feed-action-service)
+4. [Message Service](#message-service)
+5. [Notification Service](#notification-service)
 
 ---
 
@@ -61,10 +64,10 @@ The Feed Post Service manages the creation, retrieval, and deletion of user post
   - Post must exist
   - User must be the author of the post
 
-#### 3. Get All Feed Posts
-- **Method**: `getAllFeedPosts()`
-- **Description**: Retrieves all feed posts (pagination to be added later)
-- **Returns**: `List<Post>`
+#### 3. Get Feed Posts
+- **Method**: `getFeedPosts()`
+- **Description**: Retrieves all feed posts using pagination
+- **Returns**: `CursorResponse<FeedPostResponse>`
 
 ---
 
@@ -111,16 +114,20 @@ null
 
 **Response** (200 OK):
 ```json
-[
-  {
-    "id": 1,
-    "title": "Post title",
-    "content": "Post content",
-    "author": 1,
-    "createdAt": "2026-03-08T10:30:00",
-    "postType": "share"
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Post title",
+      "content": "Post content",
+      "author": 1,
+      "postType": "share",
+      "createdAt": "2026-03-08T10:30:00"
+    }
+  ],
+  "nextCursor": "cursorValue in base64",
+  "hasNext": true
+}
 ```
 
 ---
@@ -190,8 +197,37 @@ The Classified Post Service manages classified posts intended for the Launchpad 
 
 #### 5. Get All Classified Posts
 - **Method**: `getAllClassifiedPosts()`
-- **Description**: Retrieves all classified posts (pagination to be added later)
+- **Description**: Retrieves all classified posts using pagination
+- **Returns**: `CursorResponse<ClassifiedPost>`
+
+#### 6. Apply to Classified Post
+- **Method**: `applyToClassifiedPost(Integer postId, Integer userId)`
+- **Description**: Allows a user to apply to an open classified post
+- **Returns**: void
+- **Validation**:
+  - Post ID must not be null
+  - User ID must not be null
+  - Post must exist and be in "open" status
+  - User cannot apply to the same post multiple times
+  - User cannot apply to their own post
+
+#### 7. Get Applications for Classified Post
+- **Method**: `getApplicationsForClassifiedPost(Integer postId, Integer userId)`
+- **Description**: Retrieves all applications for a classified post
+- **Returns**: `List<ClassifiedPostApplication>`
+- **Validation**:
+  - Post ID must not be null
+  - User must be the author of the post
+  - User cannot be null
+  - Post must exist
+
+#### 8. Get all applications by user
+- **Method**: `getAppliedClassifiedPostsByUser(Integer userId)`
+- **Description**: Retrieves all classified posts a user has applied to
 - **Returns**: `List<ClassifiedPost>`
+- **Validation**:
+  - User ID must not be null
+  - User must exist
 
 ---
 
@@ -235,6 +271,39 @@ null
 ```
 
 ---
+#### GET `/api/classified`
+** Get all classified posts**
+
+** Query Parameters**:
+- `limit` (Integer, optional) - Number of posts to return (default: 25)
+- `statusType` (String) - Filter by status type
+
+**Response** (200 OK):
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Seeking Java Developer",
+      "content": "Looking for an experienced Java developer for our project",
+      "author": 1,
+      "projectId": 5,
+      "status": "open",
+      "createdAt": "2026-03-22T11:30:00",
+      "updatedAt": "2026-03-22T11:30:00"
+    }
+  ],
+  "nextCursor": "cursorValue in base64",
+  "hasNext": true
+}
+```
+
+**Error Response** (400 Bad Request):
+```json
+null
+```
+
+---
 
 #### GET `/api/classified/{postId}`
 **Get a specific classified post**
@@ -251,8 +320,8 @@ null
   "author": 1,
   "projectId": 5,
   "status": "open",
-  "createdAt": "2026-03-08T10:30:00",
-  "updatedAt": "2026-03-08T10:30:00"
+  "createdAt": "2026-03-22T11:30:00",
+  "updatedAt": "2026-03-22T11:30:00"
 }
 ```
 
@@ -279,8 +348,8 @@ null
     "author": 1,
     "projectId": 5,
     "status": "open",
-    "createdAt": "2026-03-08T10:30:00",
-    "updatedAt": "2026-03-08T10:30:00"
+    "createdAt": "2026-03-22T11:30:00",
+    "updatedAt": "2026-03-22T11:30:00"
   }
 ]
 ```
@@ -311,9 +380,125 @@ null
   "author": 1,
   "projectId": 5,
   "status": "filled",
-  "createdAt": "2026-03-08T10:30:00",
-  "updatedAt": "2026-03-08T11:00:00"
+  "createdAt": "2026-03-22T11:30:00",
+  "updatedAt": "2026-03-22T11:30:00"
 }
+```
+
+**Error Response** (400 Bad Request):
+```json
+null
+```
+
+---
+#### POST `/api/classified/subscriptions`
+**Subscribe to classified post notifications**
+
+**Request Body**:
+```json
+{
+  "userId": 1
+}
+```
+
+**Response** (200 OK):
+```json
+"Subscribed to classified post notifications successfully"
+```
+
+**Error Response** (400 Bad Request):
+```json
+"Error message"
+```
+
+---
+#### DELETE `/api/classified/subscriptions`
+**Unsubscribe from classified post notifications**
+
+**Query Parameters**:
+- `userId` (Integer) - ID of the user
+
+**Response** (200 OK):
+```json
+"Unsubscribed successfully"
+```
+
+**Error Response** (400 Bad Request):
+```json
+"Error message"
+```
+---
+#### POST `/api/classified/{postId}/apply`
+**Apply to an open classified post**
+
+**Path Parameters**:
+- `postId` (Integer) - ID of the classified post
+
+**Request Body**
+```json
+{
+    "userId": 1
+}
+```
+
+**Response** (200 OK):
+```json
+"Application submitted successfully"
+```
+
+**Error Response** (400 Bad Request):
+```json
+"Error message"
+```
+---
+#### GET `/api/classified/{postId}/applications`
+**Get all applications for a classified post**
+
+**Path Parameters**:
+- `postId` (Integer) - ID of the classified post
+
+**Query Parameters**:
+- `userId` (Integer) - ID of the user requesting the applications
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "postId": 5,
+    "userId": 1,
+    "status": "APPLIED",
+    "appliedAt": "2026-03-22T11:30:00"
+  }
+]
+```
+
+**Error Response** (400 Bad Request):
+```json
+null
+```
+
+---
+#### GET `/api/classified/applications/me`
+**Get all classified posts a user has applied to**
+
+**Query Parameters**:
+- `userId` (Integer) - ID of the user
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "title": "Seeking Java Developer",
+    "content": "Looking for an experienced Java developer for our project",
+    "author": 1,
+    "projectId": 5,
+    "status": "open",
+    "createdAt": "2026-03-22T11:30:00",
+    "updatedAt": "2026-03-22T11:30:00"
+  }
+]
 ```
 
 **Error Response** (400 Bad Request):
@@ -635,3 +820,209 @@ The Feed Action Service manages interactions with feed posts, including likes an
 ```
 
 ---
+## Message Service
+
+### Overview
+The message service manages message creation, conversation creation, retrieving messages for a conversation
+
+### Service Methods
+
+#### 1. Create a Message
+- **Method**: `sendMessage(Integer conversationId, Integer recipientId, String content)`
+- **Description**: Sends a message in a conversation
+- **Returns**: `SendMessageResponse` object
+- **Validation**:
+  - Sender ID is required
+  - Recipient ID is required
+  - Content must not be null or empty
+  - Sender or recipient must be a participant of the conversation
+
+#### 2. Create a Conversation
+- **Method**: `getOrCreateConversation(Integer senderId, Integer recipientId)`
+- **Description**: Retrieves an existing conversation between two users or creates a new one if it doesn't exist
+- **Returns**: `Conversations` object
+- **Validation**:
+  - Sender ID is required
+  - Recipient ID is required
+  - Sender and recipient cannot be the same user
+
+#### 3. Get Messages for Conversation
+- **Method**: `getConversationMessages(Integer conversationId, Integer userId)`
+- **Description**: Retrieves all messages for a specific conversation
+- **Returns**: `List<MessageResponse>` object
+- **Validation**:
+  - Conversation ID is required
+  - User must be a participant of the conversation
+
+---
+### REST API Endpoints
+
+#### POST `/api/message/{recipientId}/send` 
+**Send a message**
+
+**Path Parameters**:
+- `recipientId` (Integer) - ID of the receiving user
+
+**Request Body**:
+```json
+{
+  "conversationId": 5,
+  "senderId": 1,
+  "content": "Hi there"
+}
+```
+
+**Response** (201 CREATED):
+```json
+{
+  "conversationId": 5,
+  "messageId": 10,
+  "senderId": 1,
+  "recipientId": 2,
+  "content": "Hi there",
+  "createdAt": "2026-03-22T11:30:00"
+}
+```
+
+**Error Response** (400 Bad Request):
+```json
+null
+```
+
+#### GET `/api/message/conversation/{conversationId}`
+**Get messages for a conversation**
+
+**Path Parameters**:
+- `conversationId` (Integer) - ID of the conversation
+
+**Query Parameters**:
+- `userId` (Integer) - ID of the user requesting the messages
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 10,
+    "conversationId": 5,
+    "senderId": 1,
+    "content": "Hi there",
+    "createdAt": "2026-03-22T11:30:00"
+  }
+]
+```
+
+**Error Response** (400 Bad Request):
+```json
+null
+```
+---
+
+## Notification Service
+
+### Overview
+This service manages the creation and retrieval of notifications for users
+
+### Service Methods
+
+#### 1. Create Notification
+- **Method**: `createNotification(NotificationBuilder builder)`
+- **Description**: Creates a new notification based on the provided builder object
+- **Returns**: void
+
+#### 2. Get Classified Notifications for User
+- **Method**: `getClassifiedNotifications(Integer userId, boolean unread)`
+- **Description**: Retrieves classified post notifications for a user, with an option to filter by unread status
+- **Returns**: `List<NotificationResponse>`
+
+#### 3. Get Message Notifications for User
+- **Method**: `getMessageNotifications(Integer userId, boolean unread)`
+- **Description**: Retrieves message notifications for a user, with an option to filter by unread
+- **Returns**: `List<NotificationResponse>`
+
+#### 4. Mark Notification as Read
+- **Method**: `markAsRead(Integer notificationId, Integer userId)`
+- **Description**: Marks a specific notification as read for a user
+- **Returns**: void
+- **Validation**:
+  - Notification must exist
+  - Notification must belong to the user
+
+--- 
+### REST API Endpoints
+
+#### GET `/api/notifications/{userId}/classified`
+**Get classified post notifications for a user**
+
+**Path Parameters**:
+- `userId` (Integer) - ID of the user
+
+**Query Parameters**:
+- `unread` (boolean) - Filter by unread notifications
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 5,
+    "recipientId": 2,
+    "senderUserId": 1,
+    "type": "CLASSIFIED_CREATED",
+    "message": "A new classified post has been created",
+    "classifiedPostId": 10,
+    "conversationId": null,
+    "isRead": false,
+    "createdAt": "2026-03-22T11:30:00",
+    "readAt": null
+  }
+]
+```
+
+#### GET `/api/notifications/{userId}/messages`
+**Get message notifications for a user**
+
+**Path Parameters**:
+- `userId` (Integer) - ID of the user
+
+**Query Parameters**:
+- `unread` (boolean) - Filter by unread notifications
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 6,
+    "recipientId": 2,
+    "senderUserId": 1,
+    "type": "MESSAGE",
+    "message": "Hey there",
+    "classifiedPostId": null,
+    "conversationId": 5,
+    "isRead": false,
+    "createdAt": "2026-03-22T11:30:00",
+    "readAt": null
+  }
+]
+```
+
+#### PATCH `/api/notifications/{notificationId}/read`
+**Mark a notification as read**
+
+**Path Parameters**:
+- `notificationId` (Integer) - ID of the notification
+
+**Request Body**:
+```json
+{
+  "userId": 2
+}
+```
+
+**Response** (200 OK):
+```json
+"Notification marked as read"
+```
+
+**Error Response** (400 Bad Request):
+```json
+"Error message"
+```

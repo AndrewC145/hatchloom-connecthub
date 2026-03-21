@@ -37,7 +37,7 @@ public class NotificationController {
                                            @RequestBody Integer userId) {
         try {
             notificationService.markAsRead(notificationId, userId);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>("Notification marked as read", HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
