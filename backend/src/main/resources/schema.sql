@@ -12,7 +12,7 @@ CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    author INT NOT NULL,
+    author UUID NOT NULL,
     post_type VARCHAR(50) NOT NULL CHECK (post_type IN ('share', 'announcement', 'achievement')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -21,9 +21,9 @@ CREATE TABLE classified_posts (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    author INT NOT NULL,
-    project_id INT NOT NULL,
-    assigned_to INT,
+    author UUID NOT NULL,
+    project_id UUID NOT NULL,
+    assigned_to UUID,
     status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'filled', 'closed')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -32,7 +32,7 @@ CREATE TABLE classified_posts (
 CREATE TABLE classified_post_applications (
     id SERIAL PRIMARY KEY,
     classified_post_id INT NOT NULL,
-    applicant_id INT NOT NULL,
+    applicant_id UUID NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'APPLIED' CHECK (status IN ('APPLIED', 'ACCEPTED', 'REJECTED')),
     applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(classified_post_id, applicant_id),
@@ -42,7 +42,7 @@ CREATE TABLE classified_post_applications (
 CREATE TABLE feed_actions (
     id SERIAL PRIMARY KEY,
     post_id INT NOT NULL,
-    user_id INT NOT NULL,
+    user_id UUID NOT NULL,
     action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('like', 'comment')),
     comment_text TEXT,
     parent_action_id INT,
@@ -57,17 +57,16 @@ CREATE TABLE feed_actions (
 
 CREATE TABLE conversations (
     id SERIAL PRIMARY KEY,
-    user1_id INT NOT NULL,
-    user2_id INT NOT NULL,
+    user1_id UUID NOT NULL,
+    user2_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user1_id, user2_id),
-    CONSTRAINT check_user_order CHECK (user1_id < user2_id)
+    UNIQUE (user1_id, user2_id)
 );
 
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
     conversation_id INT NOT NULL,
-    sender_id INT NOT NULL,
+    sender_id UUID NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
@@ -75,8 +74,8 @@ CREATE TABLE messages (
 
 CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,
-    recipient_user_id INT NOT NULL,
-    sender_user_id INT NOT NULL,
+    recipient_user_id UUID NOT NULL,
+    sender_user_id UUID NOT NULL,
     type VARCHAR(50) NOT NULL CHECK (type IN ('MESSAGE', 'CLASSIFIED_CREATED')),
     message TEXT NOT NULL,
     classified_post_id INT,
@@ -92,7 +91,7 @@ CREATE TABLE notifications (
 
 CREATE TABLE classified_subscriptions (
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

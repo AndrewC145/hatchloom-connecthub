@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
  * Entity representing an achievement post, a
  * specific type of post that can be created by users to share an achievement.
@@ -21,7 +23,7 @@ public class AchievementPost extends Post {
     @Column(name = "post_type", nullable = false, insertable = false, updatable = false)
     private final String postType = "achievement";
 
-    public AchievementPost(String title, String content, Integer author) {
+    public AchievementPost(String title, String content, UUID author) {
         super();
         this.setTitle(title);
         this.setContent(content);

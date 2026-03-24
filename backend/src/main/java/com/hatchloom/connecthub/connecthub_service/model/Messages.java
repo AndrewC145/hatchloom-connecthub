@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a message in a conversation between two users
@@ -25,8 +26,8 @@ public class Messages {
     @JoinColumn(name = "conversation_id", nullable = false, updatable = false)
     private Conversations conversation;
 
-    @Column(name = "sender_id", nullable = false)
-    private Integer senderId;
+    @Column(name = "sender_id", nullable = false, columnDefinition = "UUID")
+    private UUID senderId;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;

@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a classified post,
@@ -31,14 +32,14 @@ public class ClassifiedPost {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private Integer author;
+    @Column(nullable = false, columnDefinition = "UUID")
+    private UUID author;
 
-    @Column(name = "project_id", nullable = false)
-    private Integer projectId;
+    @Column(name = "project_id", nullable = false, columnDefinition = "UUID")
+    private UUID projectId;
 
-    @Column(name = "assigned_to", nullable = true)
-    private Integer assignedTo;
+    @Column(name = "assigned_to", columnDefinition = "UUID")
+    private UUID assignedTo;
 
     @Column(nullable = false, length = 20)
     private String status = String.valueOf(ClassifiedStatus.OPEN);

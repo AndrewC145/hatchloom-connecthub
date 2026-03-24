@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing an application to a classified post
@@ -27,8 +28,8 @@ public class ClassifiedPostApplication {
     @JoinColumn(name = "classified_post_id", nullable = false, updatable = false)
     private ClassifiedPost classifiedPost;
 
-    @Column(name = "applicant_id", nullable = false)
-    private Integer applicantId;
+    @Column(name = "applicant_id", nullable = false, columnDefinition = "UUID", updatable = false)
+    private UUID applicantId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)

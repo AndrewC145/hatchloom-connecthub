@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a notification sent to a user,
@@ -23,11 +24,11 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "recipient_user_id", nullable = false)
-    private Integer recipientUserId;
+    @Column(name = "recipient_user_id", nullable = false, columnDefinition = "UUID")
+    private UUID recipientUserId;
 
-    @Column(name = "sender_user_id", nullable = false)
-    private Integer senderUserId;
+    @Column(name = "sender_user_id", nullable = false, columnDefinition = "UUID")
+    private UUID senderUserId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a classified subscription, which allows users to subscribe to classified posts
@@ -21,8 +22,8 @@ public class ClassifiedSubscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @Column(name = "user_id", nullable = false, columnDefinition = "UUID")
+    private UUID userId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

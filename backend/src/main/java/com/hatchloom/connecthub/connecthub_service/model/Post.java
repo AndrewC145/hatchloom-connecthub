@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Abstract base class representing a post,
@@ -29,8 +30,8 @@ public abstract class Post {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private Integer author;
+    @Column(nullable = false, columnDefinition = "UUID")
+    private UUID author;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

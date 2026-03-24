@@ -9,6 +9,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing feed actions, which can be
@@ -32,8 +33,8 @@ public class FeedAction {
     @Column(name = "post_id", nullable = false, insertable = false, updatable = false)
     private Integer postId;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @Column(name = "user_id", nullable = false, updatable = false, columnDefinition = "UUID")
+    private UUID userId;
 
     @Column(name = "action_type", nullable = false, length = 20)
     private String actionType;
