@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.NotificationSummaryResponse;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,18 @@ public class NotificationController {
 
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
+    }
+
+    @GetMapping("/{userId}/all")
+    public ResponseEntity<?> getNotificationSummary(@PathVariable Integer userId, @RequestParam(defaultValue = "true") boolean unread,
+                                                    @RequestParam(defaultValue = "5") int limit) {
+        try {
+            NotificationSummaryResponse summary = notificationService.getNotificationSummary(userId, unread, limit);
+            return new ResponseEntity<>(summary, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{userId}/classified")

@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.builder.NotificationBuilder;
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
+import com.hatchloom.connecthub.connecthub_service.dto.NotificationSummaryResponse;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 import com.hatchloom.connecthub.connecthub_service.repository.NotificationRepository;
@@ -120,4 +121,42 @@ public class NotificationService {
     }
 
 
+    /**
+     * Gets a summary of notifications for the user
+     * @param userId the userID
+     * @param unreadOnly whether to include only unread notifications or all
+     * @param previewLimit the limit of notifications to include
+     * @return a notification summary containing the count, and a preview of the notifications
+     */
+    public NotificationSummaryResponse getNotificationSummary(Integer userId, boolean unreadOnly, int previewLimit) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("Invalid user ID");
+        }
+
+        if (previewLimit < 0) {
+            throw new IllegalArgumentException("Preview limit cannot be negative");
+        }
+
+        Integer classifiedUnreadCount = notificationRepository.countByRecipientUserIdAndTypeAndIsReadFalse(userId, NotificationType.CLASSIFIED_CREATED);
+        Integer messageUnreadCount = notificationRepository.countByRecipientUserIdAndTypeAndIsReadFalse(userId, NotificationType.MESSAGE);
+        Integer totalUnreadCount = classifiedUnreadCount + messageUnreadCount;
+
+        List<NotificationResponse> classifiedNotifications = getClassifiedNotifications(userId, unreadOnly)
+                .stream()
+                .limit(previewLimit)
+                .toList();
+
+        List<NotificationResponse> messageNotifications = getMessageNotifications(userId, unreadOnly)
+                .stream()
+                .limit(previewLimit)
+                .toList();
+
+        return new NotificationSummaryResponse(
+                classifiedUnreadCount,
+                messageUnreadCount,
+                totalUnreadCount,
+                classifiedNotifications,
+                messageNotifications
+        );
+    }
 }
