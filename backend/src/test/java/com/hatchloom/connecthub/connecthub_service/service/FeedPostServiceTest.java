@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -41,10 +42,13 @@ class FeedPostServiceTest {
 
     private BaseUser testUser;
 
+    private UUID unauthorizedUserId;
+
     @BeforeEach
     void setup() {
         feedPostRepository.deleteAll();
-        testUser = new BaseUser(1, "Test User", "Test@gmail.com");
+        testUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Test User", "Test@gmail.com");
+        unauthorizedUserId = UUID.fromString("00000000-0000-0000-0000-000000000099");
     }
 
     @Test
@@ -60,7 +64,7 @@ class FeedPostServiceTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Test Post 1"))
                 .andExpect(jsonPath("$.content").value("This is a test post"))
-                .andExpect(jsonPath("$.author").value(testUser.id));
+                .andExpect(jsonPath("$.author").value(testUser.id.toString()));
 
         Assertions.assertEquals(1, feedPostRepository.count());
         Post saved = feedPostRepository.findAll().getFirst();
@@ -117,7 +121,7 @@ class FeedPostServiceTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.title").value("Test " + post))
                     .andExpect(jsonPath("$.content").value("This is a test " + post))
-                    .andExpect(jsonPath("$.author").value(testUser.id));
+                    .andExpect(jsonPath("$.author").value(testUser.id.toString()));
         }
 
         Assertions.assertEquals(3, feedPostRepository.count());
@@ -220,11 +224,11 @@ class FeedPostServiceTest {
 
         mockMvc.perform(delete("/api/feed/{postId}", post.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("userId", String.valueOf(testUser.id + 1))
+                        .param("userId", unauthorizedUserId.toString())
                         .with(csrf())
                         .with(user("testuser")))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User " + (testUser.id + 1) + " is not authorized to delete post " + post.getId()));
+                .andExpect(content().string("User " + (unauthorizedUserId) + " is not authorized to delete post " + post.getId()));
 
         Assertions.assertEquals(1, feedPostRepository.count());
     }

@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -48,9 +48,9 @@ class ClassifiedPostServiceTest {
     void setup() {
         classifiedPostRepository.deleteAll();
         classifiedPostApplicationRepository.deleteAll();
-        testUser = new BaseUser(1, "testuser", "test@gmail.com");
-        testProject = new BaseProject(1, "Test Project", "A project for testing", testUser, List.of());
-        testUser2 = new BaseUser(2, "testuser2", "test2@gmail.com");
+        testUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "testuser", "test@gmail.com");
+        testProject = new BaseProject(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Test Project", "A project for testing", testUser, List.of());
+        testUser2 = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000003"), "testuser2", "test2@gmail.com");
     }
 
     @Test
@@ -67,11 +67,11 @@ class ClassifiedPostServiceTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Classified test post"))
                 .andExpect(jsonPath("$.content").value("This is a classified test"))
-                .andExpect(jsonPath("$.author").value(testUser.id))
-                .andExpect(jsonPath("$.projectId").value(testProject.id))
+                .andExpect(jsonPath("$.author").value(testUser.id.toString()))
+                .andExpect(jsonPath("$.projectId").value(testProject.id.toString()))
                 .andExpect(jsonPath("$.status").value("open"));
 
-        ClassifiedPost post = classifiedPostRepository.findAll().get(0);
+        ClassifiedPost post = classifiedPostRepository.findAll().getFirst();
         Assertions.assertEquals(1, classifiedPostRepository.count());
         Assertions.assertEquals(post.getProjectId(), testProject.id);
         Assertions.assertEquals(post.getAuthor(), testUser.id);

@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -45,8 +47,8 @@ public class FeedActionServiceTest {
     @BeforeEach
     void setup() throws Exception {
         feedActionRepository.deleteAll();
-        testUser = new BaseUser(1, "testuser", "test@gmail.com");
-        anotherUser = new BaseUser(2, "anotheruser", "anotheruser@gmail.com");
+        testUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "testuser", "test@gmail.com");
+        anotherUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000002"), "anotheruser", "anotheruser@gmail.com");
 
         PostCreationRequest request = new PostCreationRequest(
                 new BasePostRequest("Test Announcement", "This is a test announcement post", testUser.id),
@@ -246,7 +248,7 @@ public class FeedActionServiceTest {
         Assertions.assertNotNull(comment);
 
         mockMvc.perform(delete("/api/feed/actions/comment/{commentId}", comment.getId())
-                .param("userId", String.valueOf(999))
+                .param("userId", UUID.fromString("00000000-0000-0000-0000-000000000099").toString())
                 .with(csrf())
                 .with(user("otheruser")))
                 .andExpect(status().isBadRequest());

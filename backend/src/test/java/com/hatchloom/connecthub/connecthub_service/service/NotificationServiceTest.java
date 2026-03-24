@@ -21,6 +21,7 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -55,10 +56,11 @@ public class NotificationServiceTest {
     void setup() {
         messageRepository.deleteAll();
         classifiedPostRepository.deleteAll();
-        sender = new BaseUser(1, "Sender", "sender@gmail.com");
-        recipient = new BaseUser(2, "Recipient", "recipient@gmail.com");
-        thirdUser = new BaseUser(3, "Third User", "thirdUser@gmail.com");
-        project = new BaseProject(1, "Test Project", "This is a test project", sender, null);
+        notificationRepository.deleteAll();
+        sender = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Sender", "sender@gmail.com");
+        recipient = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Recipient", "recipient@gmail.com");
+        thirdUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000003"), "Third User", "thirdUser@gmail.com");
+        project = new BaseProject(UUID.fromString("00000000-0000-0000-0000-000000000011"), "Test Project", "This is a test project", sender, null);
     }
 
     @Test
