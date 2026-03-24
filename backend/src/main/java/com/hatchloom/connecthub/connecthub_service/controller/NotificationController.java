@@ -1,7 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
-import com.hatchloom.connecthub.connecthub_service.model.Notification;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

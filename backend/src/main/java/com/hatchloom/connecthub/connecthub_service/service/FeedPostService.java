@@ -6,7 +6,6 @@ import com.hatchloom.connecthub.connecthub_service.model.AchievementPost;
 import com.hatchloom.connecthub.connecthub_service.model.AnnouncementPost;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.model.SharePost;
-import com.hatchloom.connecthub.connecthub_service.observer.ClassifiedPostFeed;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
 import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
 import com.hatchloom.connecthub.connecthub_service.utils.PostCursorPayload;
