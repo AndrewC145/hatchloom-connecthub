@@ -104,9 +104,7 @@ function Sidebar() {
       <div className="px-3.5">
         <SidebarRow item={HUB_HOME} />
       </div>
-
       <div className="bg-border mx-3.5 my-2.5 h-px" />
-
       <div className="px-3.5">
         {SIDEBAR_SECTIONS.map(
           (section: SidebarSection, sectionIndex: number) => (
@@ -114,7 +112,6 @@ function Sidebar() {
               <div className="font-display mt-3 mb-[0.35rem] ml-2 text-[0.6rem] font-extrabold tracking-[0.09rem] text-[#c4c8d4] uppercase">
                 {section.label}
               </div>
-
               <div className="space-y-[0.1rem]">
                 {section.items.map((item: SidebarItem) => (
                   <SidebarRow
@@ -123,7 +120,6 @@ function Sidebar() {
                   />
                 ))}
               </div>
-
               {sectionIndex < SIDEBAR_SECTIONS.length - 1 ? (
                 <div className="bg-border my-2.5 h-px" />
               ) : null}
