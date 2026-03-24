@@ -267,4 +267,21 @@ public class ClassifiedPostService {
         List<ClassifiedPostApplication> applications = classifiedPostApplicationRepository.findByApplicantIdOrderByAppliedAtDesc(userId);
         return applications.stream().map(ClassifiedPostApplication::getClassifiedPost).toList();
     }
+
+    /**
+     * Counts the total number of applications across all classified posts authored by a specific user
+     * @param authorId the user ID of the author
+     * @return the total number of applications for the author's posts
+     */
+    public Integer getTotalApplicationsForAuthor(Integer authorId) {
+        if (authorId == null) {
+            throw new IllegalArgumentException("Author ID must not be null");
+        }
+
+        if (authorId <= 0) {
+            throw new IllegalArgumentException("Author ID must be a positive integer");
+        }
+
+        return classifiedPostApplicationRepository.countByPostAuthorId(authorId);
+    }
 }

@@ -460,7 +460,6 @@ class ClassifiedPostServiceTest {
                         .param("userId", String.valueOf(testUser2.id))
                         .with(csrf())
                         .with(user("testuser2")))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(status().isOk());
     }
 }

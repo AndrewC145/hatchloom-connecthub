@@ -125,10 +125,12 @@ public class ClassifiedPostController {
         }
     }
     @GetMapping("/applications/me")
-    public ResponseEntity<List<ClassifiedPost>> getMyApplications(@RequestParam Integer userId) {
+    public ResponseEntity<ApplicationResponse> getMyApplications(@RequestParam Integer userId) {
         try {
             List<ClassifiedPost> posts = classifiedPostService.getAppliedClassifiedPostsByUser(userId);
-            return new ResponseEntity<>(posts, HttpStatus.OK);
+            Integer totalApplications = classifiedPostService.getTotalApplicationsForAuthor(userId);
+            ApplicationResponse response = new ApplicationResponse(posts, totalApplications);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
