@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { type NavLink } from "../types/navlinks";
 
-const NAV_LINKS: { name: string; emoji: string }[] = [
+const NAV_LINKS: NavLink = [
   { name: "Explore", emoji: "🔭" },
   { name: "Connect", emoji: "🔗" },
   { name: "Launch", emoji: "🚀" },
@@ -9,6 +10,10 @@ const NAV_LINKS: { name: string; emoji: string }[] = [
 function Header() {
   const [messageNotifications, setMessageNotifications] = useState<number>(3);
   const [notifications, setNotifications] = useState<number>(5);
+
+  useEffect(() => {
+    // Simulate receiving new notifications every 10 seconds
+  });
   return (
     <header>
       <nav className="border-b-1.5 border-border bg-card sticky top-0 z-100 flex h-15 items-center justify-between border-solid px-7 py-0 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
@@ -35,11 +40,12 @@ function Header() {
           ))}
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="font-display border-1.5 flex cursor-pointer items-center gap-[0.35rem] rounded-[99px] border-solid border-transparent px-3 py-[0.35rem] text-[0.78rem] font-extrabold">
+          <div className="font-display flex items-center gap-[0.35rem] rounded-[99px] border-[1.5px] border-[#ffd98a] bg-linear-to-br from-[#fff7e6] to-[#fff0cc] px-3 py-[0.35rem] text-[0.8rem] font-extrabold text-[#b45309]">
             🔥 18-day streak
           </div>
-          <div className="font-display border-1.5 flex cursor-pointer items-center gap-[0.35rem] rounded-[99px] border-solid border-transparent px-3 py-[0.35rem] text-[0.78rem] font-extrabold">
-            ⚡ 2,450 XP
+          <div className="font-display border-teal-border from-teal-light text-teal flex items-center gap-[0.35rem] rounded-[99px] border-[1.5px] bg-linear-to-br to-[#e0f5f9] px-3 py-[0.35rem] text-[0.8rem] font-extrabold">
+            {" "}
+            ⚡ 2,450 XP{" "}
           </div>
           <div className="bg-bg border-border relative flex size-8.5 cursor-pointer items-center justify-center rounded-full border-[1.5px] text-[1rem]">
             ✉️
