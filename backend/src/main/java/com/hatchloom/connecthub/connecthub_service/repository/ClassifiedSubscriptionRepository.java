@@ -5,14 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository interface for managing ClassifiedSubscription entities
  */
 public interface ClassifiedSubscriptionRepository extends JpaRepository<ClassifiedSubscription, Integer> {
     @Query("SELECT s.userId FROM ClassifiedSubscription s")
-    List<Integer> findAllUserIds();
+    List<UUID> findAllUserIds();
 
-    boolean existsByUserId(Integer userId);
-    void deleteByUserId(Integer userId);
+    boolean existsByUserId(UUID userId);
+    void deleteByUserId(UUID userId);
 }

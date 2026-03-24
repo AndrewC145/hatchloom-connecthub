@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +63,7 @@ public class FeedActionService {
      * @param userId the ID of the user unliking the post
      */
     @Transactional
-    public void unlikePost(Integer postId, Integer userId) {
+    public void unlikePost(Integer postId, UUID userId) {
         Optional<FeedAction> existingLike = feedActionRepository.findByPostIdAndUserIdAndActionType(
                 postId, userId, ActionType.LIKE.getValue());
 
@@ -104,7 +105,7 @@ public class FeedActionService {
      * @param userId the ID of the user attempting to delete the comment
      */
     @Transactional
-    public void deleteComment(Integer commentId, Integer userId) {
+    public void deleteComment(Integer commentId, UUID userId) {
         Optional<FeedAction> comment = feedActionRepository.findByIdAndUserIdAndActionType(
                 commentId, userId, ActionType.COMMENT.getValue());
 
@@ -127,7 +128,7 @@ public class FeedActionService {
      * @return the created like action
      */
     @Transactional
-    public FeedAction likeComment(Integer commentId, Integer userId) {
+    public FeedAction likeComment(Integer commentId, UUID userId) {
         FeedAction comment = feedActionRepository.getFeedActionById(commentId);
         if (comment == null || !comment.getActionType().equals(ActionType.COMMENT.getValue())) {
             throw new IllegalArgumentException("Comment with ID " + commentId + " not found");
@@ -155,7 +156,7 @@ public class FeedActionService {
      * @param userId the user ID of the person who wants to unlike the comment
      */
     @Transactional
-    public void unlikeComment(Integer commentId, Integer userId) {
+    public void unlikeComment(Integer commentId, UUID userId) {
         Optional<FeedAction> existingLike = feedActionRepository.findByParentActionIdAndUserIdAndActionType(
                 commentId, userId, ActionType.LIKE.getValue());
 
@@ -181,7 +182,7 @@ public class FeedActionService {
      * @param currentUserId the current user ID to check if they have liked the post
      * @return a PostActionsResponse containing the number of likes and comments, the list of comments, and whether the current user has liked the post
      */
-    public PostActionsResponse getPostActions(Integer postId, Integer currentUserId) {
+    public PostActionsResponse getPostActions(Integer postId, UUID currentUserId) {
         Post post = feedPostRepository.getPostById(postId);
         if (post == null) {
             throw new IllegalArgumentException("Post with ID " + postId + " not found");

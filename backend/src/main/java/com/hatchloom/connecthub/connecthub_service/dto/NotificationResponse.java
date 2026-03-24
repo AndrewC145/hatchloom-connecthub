@@ -3,6 +3,7 @@ package com.hatchloom.connecthub.connecthub_service.dto;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for handling notification responses
@@ -19,13 +20,13 @@ import java.time.LocalDateTime;
  * @param readAt
  */
 public record NotificationResponse(Integer id,
-                                   Integer recipientId,
-                                   Integer senderUserId,
+                                   UUID recipientId,
+                                   UUID senderUserId,
                                    NotificationType type,
                                    String message,
                                    Integer classifiedPostId,
-                                   Integer conversationId,
-                                   Integer messageId,
+                                   UUID conversationId,
+                                   UUID messageId,
                                    boolean isRead,
                                    LocalDateTime createdAt,
                                    LocalDateTime readAt) {

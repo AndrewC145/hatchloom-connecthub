@@ -3,26 +3,28 @@ package com.hatchloom.connecthub.connecthub_service.builder;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
 
+import java.util.UUID;
+
 /**
  * Concrete builder class for creating Notification objects
  */
 public class NotificationBuilder implements Builder {
-    private Integer recipientUserId;
-    private Integer senderUserId;
+    private UUID recipientUserId;
+    private UUID senderUserId;
     private NotificationType type;
     private String message;
     private Integer classifiedPostId;
-    private Integer conversationId;
-    private Integer messageId;
+    private UUID conversationId;
+    private UUID messageId;
 
     @Override
-    public NotificationBuilder setRecipientUserId(Integer recipientUserId) {
+    public NotificationBuilder setRecipientUserId(UUID recipientUserId) {
         this.recipientUserId = recipientUserId;
         return this;
     }
 
     @Override
-    public NotificationBuilder setSenderUserId(Integer senderId) {
+    public NotificationBuilder setSenderUserId(UUID senderId) {
         this.senderUserId = senderId;
         return this;
     }
@@ -46,13 +48,13 @@ public class NotificationBuilder implements Builder {
     }
 
     @Override
-    public NotificationBuilder setConversationId(Integer conversationId) {
+    public NotificationBuilder setConversationId(UUID conversationId) {
         this.conversationId = conversationId;
         return this;
     }
 
     @Override
-    public NotificationBuilder setMessageId(Integer messageId) {
+    public NotificationBuilder setMessageId(UUID messageId) {
         this.messageId = messageId;
         return this;
     }

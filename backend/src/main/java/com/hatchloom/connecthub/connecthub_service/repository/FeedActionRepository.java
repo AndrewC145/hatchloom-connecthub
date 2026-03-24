@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for managing feed action entities
@@ -14,12 +15,12 @@ import java.util.Optional;
 public interface FeedActionRepository extends JpaRepository<FeedAction, Integer> {
     FeedAction getFeedActionById(Integer id);
 
-    Optional<FeedAction> findByPostIdAndUserIdAndActionType(Integer postId, Integer userId, String actionType);
+    Optional<FeedAction> findByPostIdAndUserIdAndActionType(Integer postId, UUID userId, String actionType);
 
     @Query("SELECT fa FROM FeedAction fa WHERE fa.postId = :postId AND fa.actionType = 'comment' ORDER BY fa.createdAt DESC")
     List<FeedAction> findCommentsByPostId(@Param("postId") Integer postId);
 
-    Optional<FeedAction> findByIdAndUserIdAndActionType(Integer id, Integer userId, String actionType);
+    Optional<FeedAction> findByIdAndUserIdAndActionType(Integer id, UUID userId, String actionType);
 
     @Query("SELECT COUNT(fa) FROM FeedAction fa WHERE fa.postId = :postId AND fa.actionType = 'like'")
     Long countLikesByPostId(@Param("postId") Integer postId);
@@ -27,7 +28,7 @@ public interface FeedActionRepository extends JpaRepository<FeedAction, Integer>
     @Query("SELECT COUNT(fa) FROM FeedAction fa WHERE fa.postId = :postId AND fa.actionType = 'comment'")
     Long countCommentsByPostId(@Param("postId") Integer postId);
 
-    Optional<FeedAction> findByParentActionIdAndUserIdAndActionType(Integer parentActionId, Integer userId, String actionType);
+    Optional<FeedAction> findByParentActionIdAndUserIdAndActionType(Integer parentActionId, UUID userId, String actionType);
 
     @Query("SELECT COUNT(fa) FROM FeedAction fa WHERE fa.parentActionId = :commentId AND fa.actionType = 'like'")
     Long countLikesByCommentId(@Param("commentId") Integer commentId);

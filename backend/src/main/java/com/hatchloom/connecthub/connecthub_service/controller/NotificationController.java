@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for retrieving notifications for messages and classified posts,
@@ -23,7 +24,7 @@ public class NotificationController {
     }
 
     @GetMapping("/{userId}/all")
-    public ResponseEntity<?> getNotificationSummary(@PathVariable Integer userId, @RequestParam(defaultValue = "true") boolean unread,
+    public ResponseEntity<?> getNotificationSummary(@PathVariable UUID userId, @RequestParam(defaultValue = "true") boolean unread,
                                                     @RequestParam(defaultValue = "5") int limit) {
         try {
             NotificationSummaryResponse summary = notificationService.getNotificationSummary(userId, unread, limit);
@@ -35,18 +36,18 @@ public class NotificationController {
     }
 
     @GetMapping("/{userId}/classified")
-    public ResponseEntity<List<NotificationResponse>> getClassifiedNotifications(@PathVariable Integer userId, @RequestParam boolean unread) {
+    public ResponseEntity<List<NotificationResponse>> getClassifiedNotifications(@PathVariable UUID userId, @RequestParam boolean unread) {
         return new ResponseEntity<>(notificationService.getClassifiedNotifications(userId, unread), HttpStatus.OK);
     }
 
     @GetMapping("/{userId}/messages")
-    public ResponseEntity<List<NotificationResponse>> getMessageNotifications(@PathVariable Integer userId, @RequestParam boolean unread) {
+    public ResponseEntity<List<NotificationResponse>> getMessageNotifications(@PathVariable UUID userId, @RequestParam boolean unread) {
         return new ResponseEntity<>(notificationService.getMessageNotifications(userId, unread), HttpStatus.OK);
     }
 
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<String> markAsRead(@PathVariable Integer notificationId,
-                                           @RequestBody Integer userId) {
+                                           @RequestBody UUID userId) {
         try {
             notificationService.markAsRead(notificationId, userId);
             return new ResponseEntity<>("Notification marked as read", HttpStatus.OK);

@@ -12,6 +12,7 @@ import com.hatchloom.connecthub.connecthub_service.utils.PostCursorPayload;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Service
@@ -28,7 +29,7 @@ public class FeedPostService {
         Post post;
         String title = request.basePost().title();
         String content = request.basePost().content();
-        Integer authorId = request.basePost().authorId();
+        UUID authorId = request.basePost().authorId();
 
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Post title must not be null or blank");
@@ -56,7 +57,7 @@ public class FeedPostService {
 
     }
 
-    public void deleteFeedPost(Integer postId, Integer userId) {
+    public void deleteFeedPost(Integer postId, UUID userId) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
         }

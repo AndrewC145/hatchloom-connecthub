@@ -6,6 +6,8 @@ import com.hatchloom.connecthub.connecthub_service.model.Messages;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Observer implementation that listens for new messages and creates notifications for the recipients
  */
@@ -23,7 +25,7 @@ public class MessageNotificationObserver implements MessageObserver {
      * @param receiverUserId the ID of the user who should receive the notification
      */
     @Override
-    public void update(Messages message, Integer receiverUserId) {
+    public void update(Messages message, UUID receiverUserId) {
         notificationService.createNotification(new NotificationBuilder()
                 .setRecipientUserId(receiverUserId)
                 .setSenderUserId(message.getSenderId())

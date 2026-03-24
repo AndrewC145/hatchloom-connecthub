@@ -40,11 +40,11 @@ public class Notification {
     @Column(name = "classified_post_id")
     private Integer classifiedPostId;
 
-    @Column(name = "conversation_id")
-    private Integer conversationId;
+    @Column(name = "conversation_id", columnDefinition = "UUID")
+    private UUID conversationId;
 
-    @Column(name = "message_id")
-    private Integer messageId;
+    @Column(name = "message_id", columnDefinition = "UUID")
+    private UUID messageId;
 
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;

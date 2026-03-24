@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing messages, including sending messages and retrieving conversation messages.
@@ -23,7 +24,7 @@ public class MessageController {
     }
 
     @PostMapping("/{recipientId}/send")
-    public ResponseEntity<SendMessageResponse> sendMessage(@PathVariable Integer recipientId, @RequestBody SendMessageRequest request) {
+    public ResponseEntity<SendMessageResponse> sendMessage(@PathVariable UUID recipientId, @RequestBody SendMessageRequest request) {
         try {
             SendMessageResponse response = messageService.sendMessage(request.conversationId(), request.senderId(), recipientId, request.content());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -34,7 +35,7 @@ public class MessageController {
     }
 
     @GetMapping("/conversation/{conversationId}")
-    public ResponseEntity<List<MessageResponse>> getConversationMessages(@PathVariable Integer conversationId, @RequestParam Integer userId) {
+    public ResponseEntity<List<MessageResponse>> getConversationMessages(@PathVariable UUID conversationId, @RequestParam UUID userId) {
         try {
             List<MessageResponse> msgs = messageService.getConversationMessages(conversationId, userId);
             return new ResponseEntity<>(msgs, HttpStatus.OK);

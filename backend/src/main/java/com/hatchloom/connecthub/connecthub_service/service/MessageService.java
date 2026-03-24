@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +41,7 @@ public class MessageService {
      * @return a SendMessageResponse containing message details
      */
     @Transactional
-    public SendMessageResponse sendMessage(Integer conversationId, Integer senderId, Integer recipientId, String content) {
+    public SendMessageResponse sendMessage(UUID conversationId, UUID senderId, UUID recipientId, String content) {
         if (!validateInputs(senderId, recipientId, content)) {
             throw new IllegalArgumentException("Invalid input: senderId, recipientId, and content must be provided.");
         }
@@ -53,8 +54,8 @@ public class MessageService {
             c = conversationRepository.findById(conversationId).orElseThrow(() -> new IllegalArgumentException("Conversation not found with id: " + conversationId));
         }
 
-        Integer lesserId = Math.min(senderId, recipientId);
-        Integer greaterId = Math.max(senderId, recipientId);
+        UUID lesserId = senderId.compareTo(recipientId) <= 0 ? senderId : recipientId;
+        UUID greaterId = senderId.compareTo(recipientId) <= 0 ? recipientId : senderId;
 
         if (!(c.getUser1Id().equals(lesserId) && c.getUser2Id().equals(greaterId))) {
             throw new IllegalArgumentException("Conversation does not match sender and recipient");
@@ -77,9 +78,9 @@ public class MessageService {
      * @param recipientId the recipient user ID
      * @return the existing or newly created Conversations object
      */
-    public Conversations getOrCreateConversation(Integer senderId, Integer recipientId) {
-        Integer lesserId = Math.min(senderId, recipientId);
-        Integer greaterId = Math.max(senderId, recipientId);
+    public Conversations getOrCreateConversation(UUID senderId, UUID recipientId) {
+        UUID lesserId = senderId.compareTo(recipientId) <= 0 ? senderId : recipientId;
+        UUID greaterId = senderId.compareTo(recipientId) <= 0 ? recipientId : senderId;
         Optional<Conversations> c = conversationRepository.findByUser1IdAndUser2Id(lesserId, greaterId);
 
         if (c.isEmpty()) {
@@ -99,7 +100,7 @@ public class MessageService {
      * @param content the message content
      * @return true if inputs are valid, false otherwise
      */
-    public boolean validateInputs(Integer senderId, Integer recipientId, String content) {
+    public boolean validateInputs(UUID senderId, UUID recipientId, String content) {
         return senderId != null && recipientId != null && !senderId.equals(recipientId) && content != null && !content.trim().isEmpty();
     }
 
@@ -109,7 +110,7 @@ public class MessageService {
      * @param userId the user ID of the requester
      * @return a list of MessageResponse objects containing message details
      */
-    public List<MessageResponse> getConversationMessages(Integer conversationId, Integer userId) {
+    public List<MessageResponse> getConversationMessages(UUID conversationId, UUID userId) {
         Conversations conversation = conversationRepository.findById(conversationId).orElseThrow(() -> new IllegalArgumentException("Conversation not found with id: " + conversationId));
 
         if (!conversation.getUser1Id().equals(userId) && !conversation.getUser2Id().equals(userId)) {

@@ -6,6 +6,8 @@ import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Observer implementation that listens for updates to classified posts and creates notifications
  * for users when a new classified post is created
@@ -26,7 +28,7 @@ public class ClassifiedNotificationObserver implements ClassifiedObserver {
      * @param receiverUserId the user ID of the notification recipient
      */
     @Override
-    public void update(ClassifiedPost post, Integer receiverUserId) {
+    public void update(ClassifiedPost post, UUID receiverUserId) {
         String shortenedTitle = post.getTitle().substring(0, Math.min(20, post.getTitle().length()));
         notificationService.createNotification(
                 new NotificationBuilder()

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for managing notifications
@@ -39,7 +40,7 @@ public class NotificationService {
      * @param unread whether to get only unread notifications or all notifications
      * @return a list of notification responses
      */
-    public List<NotificationResponse> getClassifiedNotifications(Integer userId, boolean unread) {
+    public List<NotificationResponse> getClassifiedNotifications(UUID userId, boolean unread) {
         List<Notification> notifications;
         if (unread) {
             notifications = notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
@@ -73,7 +74,7 @@ public class NotificationService {
      * @param unread whether to get only unread message notifications or all message notifications
      * @return a list of notification responses
      */
-    public List<NotificationResponse> getMessageNotifications(Integer userId, boolean unread) {
+    public List<NotificationResponse> getMessageNotifications(UUID userId, boolean unread) {
         List<Notification> msgNotifications;
         if (unread) {
             msgNotifications = notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
@@ -106,7 +107,7 @@ public class NotificationService {
      * @param notificationId the notification ID to mark as read
      * @param userId the user ID of the recipient of the notification
      */
-    public void markAsRead(Integer notificationId, Integer userId) {
+    public void markAsRead(Integer notificationId, UUID userId) {
         Optional<Notification> notification = Optional.of(notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("Notification does not exist")));
 
@@ -128,8 +129,8 @@ public class NotificationService {
      * @param previewLimit the limit of notifications to include
      * @return a notification summary containing the count, and a preview of the notifications
      */
-    public NotificationSummaryResponse getNotificationSummary(Integer userId, boolean unreadOnly, int previewLimit) {
-        if (userId == null || userId <= 0) {
+    public NotificationSummaryResponse getNotificationSummary(UUID userId, boolean unreadOnly, int previewLimit) {
+        if (userId == null) {
             throw new IllegalArgumentException("Invalid user ID");
         }
 

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing classified posts,
@@ -93,7 +94,7 @@ public class ClassifiedPostController {
     }
 
     @DeleteMapping("/subscriptions")
-    public ResponseEntity<String> unsubscribe(@RequestParam Integer userId) {
+    public ResponseEntity<String> unsubscribe(@RequestParam UUID userId) {
         try {
             classifiedPostFeed.unsubscribe(userId);
             return new ResponseEntity<>("Unsubscribed successfully", HttpStatus.OK);
@@ -115,7 +116,7 @@ public class ClassifiedPostController {
     }
 
     @GetMapping("/{postId}/applications")
-    public ResponseEntity<List<ClassifiedPostApplication>> getApplications(@PathVariable Integer postId, @RequestParam Integer userId) {
+    public ResponseEntity<List<ClassifiedPostApplication>> getApplications(@PathVariable Integer postId, @RequestParam UUID userId) {
         try {
             List<ClassifiedPostApplication> applications = classifiedPostService.getApplicationsForClassifiedPost(postId, userId);
             return new ResponseEntity<>(applications, HttpStatus.OK);
@@ -125,7 +126,7 @@ public class ClassifiedPostController {
         }
     }
     @GetMapping("/applications/me")
-    public ResponseEntity<ApplicationResponse> getMyApplications(@RequestParam Integer userId) {
+    public ResponseEntity<ApplicationResponse> getMyApplications(@RequestParam UUID userId) {
         try {
             List<ClassifiedPost> posts = classifiedPostService.getAppliedClassifiedPostsByUser(userId);
             Integer totalApplications = classifiedPostService.getTotalApplicationsForAuthor(userId);

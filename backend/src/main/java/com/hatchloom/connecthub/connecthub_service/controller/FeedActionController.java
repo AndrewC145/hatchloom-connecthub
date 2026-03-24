@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing feed actions such as liking/unliking posts and comments,
@@ -36,7 +37,7 @@ public class FeedActionController {
     @DeleteMapping("/like")
     public ResponseEntity<String> unlikePost(
             @RequestParam Integer postId,
-            @RequestParam Integer userId) {
+            @RequestParam UUID userId) {
         try {
             feedActionService.unlikePost(postId, userId);
             return new ResponseEntity<>("Post unliked successfully", HttpStatus.OK);
@@ -58,7 +59,7 @@ public class FeedActionController {
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<String> deleteComment(
             @PathVariable Integer commentId,
-            @RequestParam Integer userId) {
+            @RequestParam UUID userId) {
         try {
             feedActionService.deleteComment(commentId, userId);
             return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
@@ -70,7 +71,7 @@ public class FeedActionController {
     @GetMapping("/post/{postId}")
     public ResponseEntity<?> getPostActions(
             @PathVariable Integer postId,
-            @RequestParam(required = false) Integer userId) {
+            @RequestParam(required = false) UUID userId) {
         try {
             PostActionsResponse actions = feedActionService.getPostActions(postId, userId);
             return new ResponseEntity<>(actions, HttpStatus.OK);
@@ -115,7 +116,7 @@ public class FeedActionController {
     @DeleteMapping("/comment/{commentId}/like")
     public ResponseEntity<String> unlikeComment(
             @PathVariable Integer commentId,
-            @RequestParam Integer userId) {
+            @RequestParam UUID userId) {
         try {
             feedActionService.unlikeComment(commentId, userId);
             return new ResponseEntity<>("Comment unliked successfully", HttpStatus.OK);

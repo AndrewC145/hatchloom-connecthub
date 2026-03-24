@@ -56,7 +56,7 @@ CREATE TABLE feed_actions (
 );
 
 CREATE TABLE conversations (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     user1_id UUID NOT NULL,
     user2_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -64,8 +64,8 @@ CREATE TABLE conversations (
 );
 
 CREATE TABLE messages (
-    id SERIAL PRIMARY KEY,
-    conversation_id INT NOT NULL,
+    id UUID PRIMARY KEY,
+    conversation_id UUID NOT NULL,
     sender_id UUID NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -79,8 +79,8 @@ CREATE TABLE notifications (
     type VARCHAR(50) NOT NULL CHECK (type IN ('MESSAGE', 'CLASSIFIED_CREATED')),
     message TEXT NOT NULL,
     classified_post_id INT,
-    conversation_id INT,
-    message_id INT,
+    conversation_id UUID,
+    message_id UUID,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     read_at TIMESTAMP,

@@ -4,6 +4,7 @@ import com.hatchloom.connecthub.connecthub_service.model.ClassifiedSubscription;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedSubscriptionRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class for managing classified subscriptions
@@ -20,7 +21,7 @@ public class ClassifiedSubscriptionService {
      * Subscribes a user to classified post notifications
      * @param userId The user ID to subscribe
      */
-    public void subscribe(Integer userId) {
+    public void subscribe(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
         }
@@ -36,7 +37,7 @@ public class ClassifiedSubscriptionService {
      * Unsubscribes a user from classified post notifications
      * @param userId The user ID who wants to unsubscribe
      */
-    public void unsubscribe(Integer userId) {
+    public void unsubscribe(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
         }
@@ -48,7 +49,7 @@ public class ClassifiedSubscriptionService {
      * Retrieves a list of all user IDs subscribed to classified post notifications
      * @return list of user IDs subscribed
      */
-    public List<Integer> getAllSubscribers() {
+    public List<UUID> getAllSubscribers() {
         return subscriptionRepository.findAllUserIds();
     }
 }

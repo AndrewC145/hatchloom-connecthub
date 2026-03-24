@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for handling comment responses
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 public record CommentResponse(
         Integer id,
         Integer postId,
-        Integer userId,
+        UUID userId,
         String commentText,
         LocalDateTime createdAt
 ) {

@@ -2,6 +2,8 @@ package com.hatchloom.connecthub.connecthub_service.dto;
 
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 
+import java.util.UUID;
+
 /**
  * DTO for handling feed post responses
  * @param id
@@ -15,7 +17,7 @@ public record FeedPostResponse(
         Integer id,
         String title,
         String content,
-        Integer author,
+        UUID author,
         String postType,
         String createdAt
 ) {

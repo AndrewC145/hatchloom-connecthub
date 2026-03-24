@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for handling message responses
@@ -11,9 +12,9 @@ import java.time.LocalDateTime;
  * @param createdAt
  */
 public record MessageResponse(
-        Integer id,
-        Integer conversationId,
-        Integer senderId,
+        UUID id,
+        UUID conversationId,
+        UUID senderId,
         String content,
         LocalDateTime createdAt) {
 

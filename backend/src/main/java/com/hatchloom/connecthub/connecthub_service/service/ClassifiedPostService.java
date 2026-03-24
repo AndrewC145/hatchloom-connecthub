@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class for managing classified posts, including creation,
@@ -44,7 +45,7 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Invalid classified post creation request");
         }
 
-        Integer authorId = request.basePost().authorId();
+        UUID authorId = request.basePost().authorId();
 
         ClassifiedPost post = new ClassifiedPost();
         post.setTitle(request.basePost().title());
@@ -105,7 +106,7 @@ public class ClassifiedPostService {
      * @param postId the post ID to validate
      * @param userId the user ID to validate
      */
-    private void validatePostParams(Integer postId, Integer userId) {
+    private void validatePostParams(Integer postId, UUID userId) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
         }
@@ -123,7 +124,7 @@ public class ClassifiedPostService {
      * @param newStatus the new status to set
      * @return the updated ClassifiedPost entity
      */
-    public ClassifiedPost updateClassifiedPostStatus(Integer postId, Integer userId, String newStatus) {
+    public ClassifiedPost updateClassifiedPostStatus(Integer postId, UUID userId, String newStatus) {
         validatePostParams(postId, userId);
 
         ClassifiedPost post = classifiedPostRepository.getClassifiedPostById(postId).orElseThrow(() -> new IllegalArgumentException("Post with ID " + postId + " does not exist"));
@@ -165,7 +166,7 @@ public class ClassifiedPostService {
      * @param postId The post ID they want to apply to
      * @param userId the user ID of the applicant
      */
-    public void applyToClassifiedPost(Integer postId, Integer userId) {
+    public void applyToClassifiedPost(Integer postId, UUID userId) {
         validatePostParams(postId, userId);
 
         ClassifiedPost post = classifiedPostRepository.getClassifiedPostById(postId).orElseThrow(() -> new IllegalArgumentException("Post with ID " + postId + " does not exist"));
@@ -225,10 +226,6 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
         }
 
-        if (request.projectId() <= 0) {
-            throw new IllegalArgumentException("Project ID must be a positive integer");
-        }
-
         return false;
     }
 
@@ -238,7 +235,7 @@ public class ClassifiedPostService {
      * @param userId the user ID of the author requesting the applications
      * @return a list of ClassifiedPostApplications
      */
-    public List<ClassifiedPostApplication> getApplicationsForClassifiedPost(Integer postId, Integer userId) {
+    public List<ClassifiedPostApplication> getApplicationsForClassifiedPost(Integer postId, UUID userId) {
         validatePostParams(postId, userId);
 
         ClassifiedPost post = classifiedPostRepository.getClassifiedPostById(postId).orElseThrow(() -> new IllegalArgumentException("Post with ID " + postId + " does not exist"));
@@ -255,13 +252,9 @@ public class ClassifiedPostService {
      * @param userId the user ID of the applicant
      * @return a list of classified posts that the user has applied to
      */
-    public List<ClassifiedPost> getAppliedClassifiedPostsByUser(Integer userId) {
+    public List<ClassifiedPost> getAppliedClassifiedPostsByUser(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID must not be null");
-        }
-
-        if (userId <= 0) {
-            throw new IllegalArgumentException("User ID must be a positive integer");
         }
 
         List<ClassifiedPostApplication> applications = classifiedPostApplicationRepository.findByApplicantIdOrderByAppliedAtDesc(userId);
@@ -273,13 +266,9 @@ public class ClassifiedPostService {
      * @param authorId the user ID of the author
      * @return the total number of applications for the author's posts
      */
-    public Integer getTotalApplicationsForAuthor(Integer authorId) {
+    public Integer getTotalApplicationsForAuthor(UUID authorId) {
         if (authorId == null) {
             throw new IllegalArgumentException("Author ID must not be null");
-        }
-
-        if (authorId <= 0) {
-            throw new IllegalArgumentException("Author ID must be a positive integer");
         }
 
         return classifiedPostApplicationRepository.countByPostAuthorId(authorId);

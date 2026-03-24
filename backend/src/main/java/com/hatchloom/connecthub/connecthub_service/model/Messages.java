@@ -19,8 +19,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Messages {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "conversation_id", nullable = false, updatable = false)
@@ -37,7 +37,7 @@ public class Messages {
     private LocalDateTime createdAt;
 
     @Transient
-    public Integer getConversationId() {
+    public UUID getConversationId() {
         return conversation != null ? conversation.getId() : null;
     }
 }

@@ -19,8 +19,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Conversations {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "user1_id", nullable = false, columnDefinition = "UUID")
     private UUID user1Id;

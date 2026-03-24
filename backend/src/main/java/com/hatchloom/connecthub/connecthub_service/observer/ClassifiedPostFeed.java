@@ -3,6 +3,7 @@ import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedSubscriptionService;
 import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -23,7 +24,7 @@ public class ClassifiedPostFeed implements ClassifiedSubject {
      * @param userId the ID of the user subscribing to notifications
      */
     @Override
-    public void subscribe(Integer userId) {
+    public void subscribe(UUID userId) {
         subscriptionService.subscribe(userId);
     }
 
@@ -32,7 +33,7 @@ public class ClassifiedPostFeed implements ClassifiedSubject {
      * @param userId the ID of the user unsubscribing from notifications
      */
     @Override
-    public void unsubscribe(Integer userId) {
+    public void unsubscribe(UUID userId) {
         subscriptionService.unsubscribe(userId);
     }
 
@@ -42,10 +43,10 @@ public class ClassifiedPostFeed implements ClassifiedSubject {
      * @param creatorUserId the ID of the user who created the classified post
      */
     @Override
-    public void notifyObservers(ClassifiedPost post, Integer creatorUserId) {
-        List<Integer> subscribers = subscriptionService.getAllSubscribers();
+    public void notifyObservers(ClassifiedPost post, UUID creatorUserId) {
+        List<UUID> subscribers = subscriptionService.getAllSubscribers();
 
-        for (Integer userId : subscribers) {
+        for (UUID userId : subscribers) {
             if (!userId.equals(creatorUserId)) {
                 observer.update(post, userId);
             }

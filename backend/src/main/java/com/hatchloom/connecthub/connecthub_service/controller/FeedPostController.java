@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for managing feed posts, and
@@ -54,7 +55,7 @@ public class FeedPostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<String> deletePost(
             @PathVariable Integer postId,
-            @RequestParam Integer userId) {
+            @RequestParam UUID userId) {
         try {
             feedPostService.deleteFeedPost(postId, userId);
             return new ResponseEntity<>("Post deleted successfully", HttpStatus.OK);
