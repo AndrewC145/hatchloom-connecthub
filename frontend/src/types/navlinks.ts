@@ -1,6 +1,7 @@
 export type NavLink = {
   name: string;
   emoji: string;
+  link?: string;
 }[];
 
 export type NotificationPanelType = "messages" | "classified" | null;

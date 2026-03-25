@@ -4,6 +4,7 @@ import Protected from "./components/Protected";
 import AuthCallback from "./pages/AuthCallback";
 import ConnecthubProvider from "./context/ConnecthubProvider";
 import Connecthub from "./pages/Connecthub";
+import Feed from "./pages/Feed";
 
 function App() {
   return (
@@ -17,6 +18,14 @@ function App() {
             element={
               <Protected>
                 <Connecthub />
+              </Protected>
+            }
+          />
+          <Route
+            path="/feed"
+            element={
+              <Protected>
+                <Feed />
               </Protected>
             }
           />

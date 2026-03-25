@@ -5,10 +5,11 @@ import {
   type NotificationPanelType,
 } from "../types/navlinks";
 import { useConnecthubContext } from "../context/ConnecthubContext";
+import { Link } from "react-router-dom";
 
 const NAV_LINKS: NavLink = [
   { name: "Explore", emoji: "🔭" },
-  { name: "Connect", emoji: "🔗" },
+  { name: "Connect", emoji: "🔗", link: "/" },
   { name: "Launch", emoji: "🚀" },
 ];
 
@@ -78,13 +79,14 @@ function Header() {
         </div>
         <div className="flex items-center gap-0.5">
           {NAV_LINKS.map((link) => (
-            <div
+            <Link
               key={link.name}
+              to={link.link || "#"}
               className="font-display text-text-soft hover:text-text cursor-pointer space-x-2 rounded-lg px-[0.9rem] py-[0.45rem] text-[0.875rem] font-semibold transition-all duration-200 hover:bg-[#f3f4f6]"
             >
               <span>{link.emoji}</span>
               <span>{link.name}</span>
-            </div>
+            </Link>
           ))}
         </div>
         <div className="relative flex items-center gap-2.5">
