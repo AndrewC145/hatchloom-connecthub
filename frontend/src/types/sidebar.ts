@@ -1,12 +1,7 @@
-type SidebarBadge =
-  | { kind: "count"; value: number }
-  | { kind: "text"; value: string };
-
 type SidebarItem = {
   name: string;
   icon: string;
   active?: boolean;
-  badge?: SidebarBadge;
 };
 
 type SidebarSection = {
@@ -14,4 +9,4 @@ type SidebarSection = {
   items: SidebarItem[];
 };
 
-export type { SidebarBadge, SidebarItem, SidebarSection };
+export type { SidebarItem, SidebarSection };

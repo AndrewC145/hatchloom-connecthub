@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { type NavLink } from "../types/navlinks";
+import { useConnecthubContext } from "../context/ConnecthubContext";
 
 const NAV_LINKS: NavLink = [
   { name: "Explore", emoji: "🔭" },
@@ -8,9 +9,12 @@ const NAV_LINKS: NavLink = [
 ];
 
 function Header() {
-  const [messageNotifications, setMessageNotifications] = useState<number>(3);
-  const [notifications, setNotifications] = useState<number>(5);
-
+  const {
+    classifiedNotifications,
+    classifiedUnreadCount,
+    messageNotifications,
+    messageUnreadCount,
+  } = useConnecthubContext();
   useEffect(() => {
     // Simulate receiving new notifications every 10 seconds
   });
@@ -50,13 +54,13 @@ function Header() {
           <div className="bg-bg border-border relative flex size-8.5 cursor-pointer items-center justify-center rounded-full border-[1.5px] text-[1rem]">
             ✉️
             <div className="bg-pink absolute -top-0.75 -right-0.75 flex size-3.75 items-center justify-center rounded-full border-2 border-white text-[0.55rem] font-extrabold text-white">
-              {messageNotifications}
+              {messageUnreadCount}
             </div>
           </div>
           <div className="bg-bg border-border relative flex size-8.5 cursor-pointer items-center justify-center rounded-full border-[1.5px] text-[1rem]">
             🔔
             <div className="bg-pink absolute -top-0.75 -right-0.75 flex size-3.75 items-center justify-center rounded-full border-2 border-white text-[0.55rem] font-extrabold text-white">
-              {notifications}
+              {classifiedUnreadCount}
             </div>
           </div>
           <div className="from-charcoal flex size-9 cursor-pointer items-center justify-center rounded-full border-[2.5px] border-white bg-linear-to-br to-[#3d3060] text-[1.2rem] shadow-[0_2px_8px_rgba(8,145,178,0.2)]">

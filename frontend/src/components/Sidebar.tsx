@@ -1,8 +1,4 @@
-import {
-  type SidebarBadge,
-  type SidebarItem,
-  type SidebarSection,
-} from "../types/sidebar";
+import { type SidebarItem, type SidebarSection } from "../types/sidebar";
 
 const HUB_HOME: SidebarItem = {
   name: "Hub Home",
@@ -17,17 +13,14 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         name: "Feed & Channels",
         icon: "💬",
-        badge: { kind: "count", value: 12 },
       },
       {
         name: "Mailbox",
         icon: "📬",
-        badge: { kind: "count", value: 4 },
       },
       {
         name: "Upcoming Events",
         icon: "📅",
-        badge: { kind: "text", value: "2 NEW" },
       },
     ],
   },
@@ -63,22 +56,6 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
   },
 ];
 
-function SidebarBadgePill({ badge }: { badge: SidebarBadge }) {
-  if (badge.kind === "count") {
-    return (
-      <span className="font-display text-pink ml-auto flex min-w-4.5 items-center justify-center rounded-[99px] bg-[#fff0f5] px-1.25 text-[0.6rem] leading-4.5 font-extrabold">
-        {badge.value}
-      </span>
-    );
-  }
-
-  return (
-    <span className="font-display from-teal-light text-teal ml-auto rounded-[99px] bg-linear-to-br to-[#e0f5f9] px-[0.4rem] py-[0.1rem] text-[0.55rem] font-extrabold tracking-[0.02em]">
-      {badge.value}
-    </span>
-  );
-}
-
 function SidebarRow({ item }: { item: SidebarItem }) {
   return (
     <button
@@ -93,7 +70,6 @@ function SidebarRow({ item }: { item: SidebarItem }) {
         {item.icon}
       </span>
       <span>{item.name}</span>
-      {item.badge ? <SidebarBadgePill badge={item.badge} /> : null}
     </button>
   );
 }
