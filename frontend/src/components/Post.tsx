@@ -1,4 +1,10 @@
-import type { BackendPost } from "../types/post";
+import { useState } from "react";
+import type { BackendPost, PostComment } from "../types/post";
+import apiClient from "../api/client";
+
+type PostProps = {
+  post: BackendPost;
+};
 
 function getPostTypeBadgeClass(postType: string) {
   const lower = postType.toLowerCase();
@@ -8,17 +14,18 @@ function getPostTypeBadgeClass(postType: string) {
   }
 
   if (lower.includes("achievement")) {
-    return "border-amber-200 bg-amber-200 text-amber-800";
+    return "border-gray-300 bg-gray-100 text-gray-700";
   }
 
   if (lower.includes("share")) {
-    return "border-green-300 bg-green-500 text-white";
+    return "border-gray-200 bg-white text-gray-700";
   }
 
   return "border-red-200 bg-red-100 text-red-700";
 }
 
-function formatCreatedAt(value: string) {
+function formatCreatedAt(value?: string) {
+  if (!value) return "Unknown date";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Unknown date";
 
@@ -31,11 +38,53 @@ function formatCreatedAt(value: string) {
   });
 }
 
-function Post({ post }: { post: BackendPost }) {
+function Post({ post }: PostProps) {
+  const [liked, setLiked] = useState<boolean>(
+    post.isLikedByCurrentUser ?? false,
+  );
+  const [likesCount, setLikesCount] = useState<number>(post.likes ?? 0);
+  const [comments, setComments] = useState<PostComment[]>([]);
+  const [commentsCount, setCommentsCount] = useState<number>(
+    post.comments ?? 0,
+  );
+  const [commentInput, setCommentInput] = useState<string>("");
+
+  const addLike = async () => {
+    try {
+      const response = await apiClient.post(`/api/feed/actions/like`, {
+        postId: post.id,
+      });
+
+      console.log("Like response:", response.data);
+
+      if (response.status === 201) {
+        setLiked(true);
+        setLikesCount((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+    }
+  };
+
+  const removeLike = async () => {
+    try {
+      const response = await apiClient.delete(
+        `/api/feed/actions/like?postId=${post.id}`,
+      );
+
+      console.log("Unlike response:", response.data);
+
+      if (response.status === 200) {
+        setLiked(false);
+        setLikesCount((prev) => Math.max(prev - 1, 0));
+      }
+    } catch (error) {
+      console.error("Error unliking post:", error);
+    }
+  };
+
   return (
-    <article
-      className={`border-border bg-card w-40 rounded-2xl border-[1.5px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:w-48 md:w-64 lg:w-90 xl:w-125`}
-    >
+    <article className="border-border bg-card w-40 rounded-2xl border-[1.5px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:w-48 md:w-64 lg:w-90 xl:w-150">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display text-text-soft text-[0.7rem] font-extrabold uppercase">
@@ -45,6 +94,7 @@ function Post({ post }: { post: BackendPost }) {
             {post.title}
           </h3>
         </div>
+
         <span
           className={`font-display shrink-0 rounded-[99px] border px-2.5 py-1 text-[0.60rem] font-extrabold uppercase ${getPostTypeBadgeClass(
             post.postType,
@@ -53,17 +103,19 @@ function Post({ post }: { post: BackendPost }) {
           {post.postType.toUpperCase()}
         </span>
       </div>
+
       <p className="text-text mb-4 text-sm leading-relaxed">{post.content}</p>
+
       <div className="border-border flex items-center justify-between border-t pt-3">
         <div className="min-w-0">
           <p className="font-display text-text-soft text-[0.65rem] font-extrabold uppercase">
             Author
           </p>
           <p className="text-charcoal truncate text-xs font-semibold">
-            {/*Don't have username implemented yet so just shortened UUID for now */}
-            {post.author.substring(0, 8) + "..."}
+            {post.author.substring(0, 8)}...
           </p>
         </div>
+
         <div className="text-right">
           <p className="font-display text-text-soft text-[0.65rem] font-extrabold uppercase">
             Created
@@ -71,6 +123,72 @@ function Post({ post }: { post: BackendPost }) {
           <p className="text-text text-xs font-semibold">
             {formatCreatedAt(post.createdAt)}
           </p>
+        </div>
+      </div>
+
+      <div className="border-border mt-3 border-t pt-3">
+        <div className="mb-3 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={liked ? removeLike : addLike}
+            className={`font-display cursor-pointer rounded-[99px] border px-3 py-1 text-xs font-extrabold transition-colors ${
+              liked
+                ? "border-red-200 bg-red-100 text-red-700"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            {liked ? "♥" : "♡"}
+          </button>
+
+          <span className="text-charcoal text-xs font-semibold">
+            {likesCount} likes
+          </span>
+
+          <span className="text-text-soft ml-auto text-xs font-semibold">
+            {commentsCount} comments
+          </span>
+        </div>
+
+        <div className="max-h-44 space-y-2 overflow-y-auto rounded-xl border border-gray-200 bg-white p-2.5">
+          {comments.length === 0 ? (
+            <p className="text-text-soft text-xs font-semibold">
+              No comments yet.
+            </p>
+          ) : (
+            comments.map((comment) => (
+              <div
+                key={comment.id}
+                className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-2"
+              >
+                <p className="text-charcoal text-xs leading-relaxed font-semibold">
+                  {comment.content}
+                </p>
+                <p className="text-text-soft mt-1 text-[0.65rem] font-semibold">
+                  {formatCreatedAt(comment.createdAt)}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            type="text"
+            value={commentInput}
+            onChange={(event) => setCommentInput(event.target.value)}
+            onKeyDown={(event) => {
+              // if (event.key === "Enter") addComment();
+            }}
+            placeholder="Write a comment..."
+            className="border-border bg-bg text-charcoal flex-1 rounded-lg border px-3 py-2 text-xs outline-none"
+          />
+          <button
+            type="button"
+            // onClick={addComment}
+            className="font-display cursor-pointer rounded-lg bg-black px-3 py-2 text-xs font-extrabold text-white transition-opacity hover:opacity-85"
+          >
+            Post
+          </button>
         </div>
       </div>
     </article>
