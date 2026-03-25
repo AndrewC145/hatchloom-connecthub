@@ -130,7 +130,8 @@ function Feed() {
 
       console.log("Create post response:", response);
 
-      // setPosts((prev) => [newPost, ...prev]);
+      const newPost = normalizePost(response.data);
+      setPosts((prev) => [newPost, ...prev]);
       setForm({
         title: "",
         content: "",
