@@ -33,63 +33,13 @@ function Message() {
   >(null);
 
   useEffect(() => {
-    // For now: sample data
-    /*
-    const sampleConversations: ConversationSummary[] = [
-      {
-        id: "11111111-1111-1111-1111-111111111111",
-        otherUserId: "9d0a26f8-63ea-4e72-9883-9a8db9c81001",
-        createdAt: "2026-03-24T10:15:00",
-      },
-      {
-        id: "22222222-2222-2222-2222-222222222222",
-        otherUserId: "3e7f8e64-1783-4d96-8eb6-93fe6d8ec002",
-        createdAt: "2026-03-23T14:42:00",
-      },
-      {
-        id: "33333333-3333-3333-3333-333333333333",
-        otherUserId: "7b4eeb32-89f3-4e20-9d86-7c8fba7dc003",
-        createdAt: "2026-03-22T08:05:00",
-      },
-    ];
-
-    const sampleMessages: ConversationMessage[] = [
-      {
-        id: "m-1",
-        conversationId: "11111111-1111-1111-1111-111111111111",
-        senderId: "9d0a26f8-63ea-4e72-9883-9a8db9c81001",
-        messageText: "Hey, are you free to collaborate this weekend?",
-        createdAt: "2026-03-24T10:20:00",
-      },
-      {
-        id: "m-2",
-        conversationId: "11111111-1111-1111-1111-111111111111",
-        senderId: currentUserId,
-        messageText: "Yes, I can do Saturday afternoon.",
-        createdAt: "2026-03-24T10:22:00",
-      },
-      {
-        id: "m-3",
-        conversationId: "22222222-2222-2222-2222-222222222222",
-        senderId: "3e7f8e64-1783-4d96-8eb6-93fe6d8ec002",
-        messageText: "Can you review my pitch deck?",
-        createdAt: "2026-03-23T15:10:00",
-      },
-    ];
-
-    setConversations(sampleConversations);
-    setMessages(sampleMessages);
-    setActiveConversationId(sampleConversations[0]?.id ?? null);
-    setIsLoading(false);
-    */
-
     const fetchConversations = async () => {
       try {
         const response = await apiClient.get("/api/message/conversation/");
 
         console.log(response);
         if (response.status === 200) {
-          console.log("Fetched conversations:", response.data);
+          setConversations(response.data);
         }
       } catch (error) {
         console.error("Error fetching conversations:", error);
@@ -100,6 +50,27 @@ function Message() {
 
     fetchConversations();
   }, [currentUserId]);
+
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    const fetchMessages = async () => {
+      try {
+        const response = await apiClient.get(
+          `/api/message/conversation/${activeConversationId}`,
+        );
+
+        console.log(response);
+        if (response.status === 200) {
+          const fetchedMessages = response.data;
+          setMessages(fetchedMessages);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages();
+  }, [activeConversationId]);
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeConversationId) ?? null,
@@ -117,11 +88,8 @@ function Message() {
     [activeConversationId, messages],
   );
 
-  const getResponseMessageText = (data: SendMessageResponse) =>
-    data.messageText ?? "";
-
   const handleStartConversation = async (
-    event: React.FormEvent<HTMLFormElement>,
+    event: React.SubmitEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
     setStartConversationError(null);
@@ -179,7 +147,7 @@ function Message() {
             id: data.messageId,
             conversationId: data.conversationId,
             senderId: data.senderId,
-            messageText: getResponseMessageText(data),
+            content: data.content,
             createdAt: data.createdAt,
           },
         ]);
@@ -232,7 +200,7 @@ function Message() {
             id: data.messageId,
             conversationId: data.conversationId,
             senderId: data.senderId,
-            messageText: getResponseMessageText(data),
+            content: data.content,
             createdAt: data.createdAt,
           },
         ]);
@@ -385,7 +353,7 @@ function Message() {
                       }`}
                     >
                       <p className="text-[0.82rem] leading-relaxed font-semibold">
-                        {message.messageText}
+                        {message.content}
                       </p>
                       <p
                         className={`mt-1 text-[0.66rem] font-semibold ${
@@ -400,7 +368,6 @@ function Message() {
               })
             )}
           </div>
-
           {activeConversation && (
             <div className="border-border border-t p-4">
               <form

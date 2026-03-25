@@ -3,6 +3,6 @@ export type SendMessageResponse = {
   messageId: string;
   senderId: string;
   recipientId: string;
-  messageText: string;
+  content: string;
   createdAt: string;
 };

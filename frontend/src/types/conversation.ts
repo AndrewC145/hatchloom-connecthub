@@ -8,6 +8,6 @@ export type ConversationMessage = {
   id: string;
   conversationId: string;
   senderId: string;
-  messageText: string;
+  content: string;
   createdAt: string;
 };
