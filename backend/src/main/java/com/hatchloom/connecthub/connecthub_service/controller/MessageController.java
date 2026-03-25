@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.controller;
 
+import com.hatchloom.connecthub.connecthub_service.dto.ConversationResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.MessageResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.SendMessageRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.SendMessageResponse;
@@ -44,6 +45,18 @@ public class MessageController {
             UUID userId = jwtUtil.extractUserId(authHeader);
             List<MessageResponse> msgs = messageService.getConversationMessages(conversationId, userId);
             return new ResponseEntity<>(msgs, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/conversation/")
+    public ResponseEntity<List<ConversationResponse>> getUserConversations(@RequestHeader("Authorization") String authHeader) {
+        try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
+            List<ConversationResponse> conversations = messageService.getUserConversations(userId);
+            return new ResponseEntity<>(conversations, HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
