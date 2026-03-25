@@ -79,7 +79,7 @@ public class FeedActionService {
       * @param request the request containing post ID, user ID, and comment text
      */
     @Transactional
-    public void addComment(CommentRequest request, UUID userId) {
+    public CommentResponse addComment(CommentRequest request, UUID userId) {
         Post post = feedPostRepository.getPostById(request.postId());
         if (post == null) {
             throw new IllegalArgumentException("Post with ID " + request.postId() + " not found");
@@ -97,6 +97,7 @@ public class FeedActionService {
         comment.setCommentText(request.commentText().trim());
 
         feedActionRepository.save(comment);
+        return new CommentResponse(comment.getId(), comment.getPostId(), comment.getUserId(), comment.getCommentText(), comment.getCreatedAt());
     }
 
     /**
