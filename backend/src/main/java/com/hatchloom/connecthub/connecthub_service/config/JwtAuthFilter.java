@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -30,11 +31,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
                 UUID userId = jwtUtil.extractUserId(authHeader);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, null);
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
             catch (Exception e) {
+                System.out.println("Invalid JWT: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
         }
