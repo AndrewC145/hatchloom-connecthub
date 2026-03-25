@@ -1,10 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-import java.util.UUID;
-
 /**
  * Base DTO for handling common fields for post types
  * @param title

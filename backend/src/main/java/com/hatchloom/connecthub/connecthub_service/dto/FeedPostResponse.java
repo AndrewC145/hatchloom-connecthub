@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.dto;
 
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -19,16 +20,24 @@ public record FeedPostResponse(
         String content,
         UUID author,
         String postType,
-        String createdAt
+        String createdAt,
+        Integer likeCount,
+        Integer commentCount,
+        Boolean likedByCurrentUser,
+        List<CommentResponse> comments
 ) {
-    public static FeedPostResponse from(Post p) {
+    public static FeedPostResponse from(Post p, Integer likeCount, Integer commentCount, Boolean likedByCurrentUser, List<CommentResponse> comments) {
         return new FeedPostResponse(
                 p.getId(),
                 p.getTitle(),
                 p.getContent(),
                 p.getAuthor(),
                 p.getPostType(),
-                p.getCreatedAt().toString()
+                p.getCreatedAt().toString(),
+                likeCount,
+                commentCount,
+                likedByCurrentUser,
+                comments
         );
     }
 }
