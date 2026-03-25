@@ -1,6 +1,7 @@
 package com.hatchloom.connecthub.connecthub_service.observer;
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedPost;
 import com.hatchloom.connecthub.connecthub_service.service.ClassifiedSubscriptionService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
