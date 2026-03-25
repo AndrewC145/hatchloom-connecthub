@@ -39,24 +39,24 @@ public class MessageController {
         }
     }
 
-    @GetMapping("/conversation/{conversationId}")
-    public ResponseEntity<List<MessageResponse>> getConversationMessages(@PathVariable UUID conversationId, @RequestHeader("Authorization") String authHeader) {
-        try {
-            UUID userId = jwtUtil.extractUserId(authHeader);
-            List<MessageResponse> msgs = messageService.getConversationMessages(conversationId, userId);
-            return new ResponseEntity<>(msgs, HttpStatus.OK);
-        }
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
     @GetMapping("/conversation/")
     public ResponseEntity<List<ConversationResponse>> getUserConversations(@RequestHeader("Authorization") String authHeader) {
         try {
             UUID userId = jwtUtil.extractUserId(authHeader);
             List<ConversationResponse> conversations = messageService.getUserConversations(userId);
             return new ResponseEntity<>(conversations, HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/conversation/{conversationId}")
+    public ResponseEntity<List<MessageResponse>> getConversationMessages(@PathVariable UUID conversationId, @RequestHeader("Authorization") String authHeader) {
+        try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
+            List<MessageResponse> msgs = messageService.getConversationMessages(conversationId, userId);
+            return new ResponseEntity<>(msgs, HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
