@@ -28,19 +28,19 @@ classified posts which are to be part of the Launchpad service.
 
 ## General Diagram Functionality
 ### Creating a post
-![Creating a post](./src/main/resources/static/images/connecthub-createFeedPost.png)
+![Creating a post](backend/src/main/resources/static/images/connecthub-createFeedPost.png)
 
 ### Getting posts
-![Getting posts](./src/main/resources/static/images/connecthub-getFeedpost.png)
+![Getting posts](backend/src/main/resources/static/images/connecthub-getFeedpost.png)
 
 ### Creating a classified post
-![Creating a classified post](./src/main/resources/static/images/connecthub-createClassified.png)
+![Creating a classified post](backend/src/main/resources/static/images/connecthub-createClassified.png)
 
 ### Create a message
-![Create a message](./src/main/resources/static/images/connecthub-createMessage.png)
+![Create a message](backend/src/main/resources/static/images/connecthub-createMessage.png)
 
 ### Create a feed action
-![Create a feed action](./src/main/resources/static/images/connecthub-createFeedaction.png)
+![Create a feed action](backend/src/main/resources/static/images/connecthub-createFeedaction.png)
 ---
 
 ## Feed Post Service

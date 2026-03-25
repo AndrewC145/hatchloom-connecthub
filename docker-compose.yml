@@ -11,8 +11,12 @@ services:
       - 'postgres_data:/var/lib/postgresql/data'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}']
+    networks:
+      - connecthub-network
   connecthub-service:
-    build: .
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: connecthub-service
     ports:
       - '8080:8080'
@@ -23,9 +27,16 @@ services:
       DB_NAME: ${DB_NAME}
       DB_PORT: ${DB_PORT}
       DB_URL: ${DB_URL}
+      AUTH_SERVICE_URL: http://user-service-app:8080
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - connecthub-network
 
 volumes:
     postgres_data:
+
+networks:
+  connecthub-network:
+    external: true
