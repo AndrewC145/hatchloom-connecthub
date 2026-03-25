@@ -28,13 +28,13 @@ public class JwtUtil {
             SecretKey k = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
             Claims claims = Jwts.parser().verifyWith(k).build().parseSignedClaims(token).getPayload();
-            Object userIdObj = claims.get("userId");
+            String subject = claims.getSubject();
 
-            if (userIdObj == null) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "userId claim missing");
+            if (subject == null) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Subject claim missing");
             }
 
-            return UUID.fromString(userIdObj.toString());
+            return UUID.fromString(subject);
 
         }
         catch (ExpiredJwtException e) {
