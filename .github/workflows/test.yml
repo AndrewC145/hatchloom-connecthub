@@ -2,9 +2,9 @@ name: Test Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -22,6 +22,7 @@ jobs:
           cache: maven
 
       - name: Build and test with Maven
+        working-directory: backend
         run: mvn clean verify
 
       - name: Upload test results
@@ -37,8 +38,8 @@ jobs:
     needs: test
 
     permissions:
-        contents: read
-        packages: write
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -57,7 +58,7 @@ jobs:
         run: |
           echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
         env:
-            OWNER: ${{ github.repository_owner }}
+          OWNER: ${{ github.repository_owner }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

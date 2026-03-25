@@ -229,9 +229,7 @@ function Post({
                     {formatCreatedAt(comment.createdAt)}
                   </p>
                   <button
-                    disabled={
-                      userId !== comment.userId && userId !== post.author
-                    }
+                    hidden={userId !== comment.userId && userId !== post.author}
                     onClick={() => deleteComment(comment.id)}
                     className="font-display mt-1 cursor-pointer text-[0.6rem] font-extrabold text-red-600 uppercase hover:text-red-800 disabled:cursor-not-allowed disabled:text-red-300"
                   >
