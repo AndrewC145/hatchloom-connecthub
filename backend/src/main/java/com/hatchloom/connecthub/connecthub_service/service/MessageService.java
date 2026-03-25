@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
+import com.hatchloom.connecthub.connecthub_service.dto.ConversationResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.MessageResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.SendMessageResponse;
 import com.hatchloom.connecthub.connecthub_service.model.Conversations;
@@ -68,7 +69,7 @@ public class MessageService {
         Messages savedMessage = messageRepository.save(m);
 
         messageNotificationObserver.update(savedMessage, recipientId);
-        return new SendMessageResponse(c.getId(), savedMessage.getId(), lesserId, greaterId, savedMessage.getContent(), savedMessage.getCreatedAt());
+        return new SendMessageResponse(c.getId(), savedMessage.getId(), senderId, recipientId, savedMessage.getContent(), savedMessage.getCreatedAt());
     }
 
     /**
@@ -122,5 +123,24 @@ public class MessageService {
                 .map(m -> new MessageResponse(m.getId(), m.getConversationId(), m.getSenderId(), m.getContent(), m.getCreatedAt()))
                 .collect(Collectors.toList());
 
+    }
+
+    /**
+     * Retrieves all conversations for a user
+     * @param userId the logged-in user
+     * @return a list of Conversations for the user
+     */
+    public List<ConversationResponse> getUserConversations(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID must be provided");
+        }
+
+        List<Conversations> conversations = conversationRepository.findConversationsByUserId(userId);
+        return conversations.stream()
+                .map(c -> {
+                    UUID otherUserId = c.getUser1Id().equals(userId) ? c.getUser2Id() : c.getUser1Id();
+                    return new ConversationResponse(c.getId(), otherUserId, c.getCreatedAt());
+                })
+                .collect(Collectors.toList());
     }
 }

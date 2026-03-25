@@ -7,33 +7,13 @@ import {
 import { useConnecthubContext } from "../context/ConnecthubContext";
 import { Link } from "react-router-dom";
 import apiClient from "../api/client";
+import { getTimeLabel } from "../utils/dateUtils";
 
 const NAV_LINKS: NavLink = [
   { name: "Explore", emoji: "🔭" },
   { name: "Connect", emoji: "🔗", link: "/" },
   { name: "Launch", emoji: "🚀" },
 ];
-
-function getTimeLabel(value?: string) {
-  if (!value) return "Just now";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Just now";
-
-  const diff = Date.now() - date.getTime();
-  const mins = Math.floor(diff / 60000);
-
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-
-  return date.toLocaleDateString();
-}
 
 function Header() {
   const {
