@@ -5,6 +5,7 @@ import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationSummaryResponse;
 import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.model.Notification;
+import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedSubscriptionRepository;
 import com.hatchloom.connecthub.connecthub_service.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +20,11 @@ import java.util.UUID;
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final ClassifiedSubscriptionRepository classifiedSubscriptionRepository;
 
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(NotificationRepository notificationRepository, ClassifiedSubscriptionRepository classifiedSubscriptionRepository) {
         this.notificationRepository = notificationRepository;
+        this.classifiedSubscriptionRepository = classifiedSubscriptionRepository;
     }
 
     /**
@@ -142,6 +145,8 @@ public class NotificationService {
         Integer messageUnreadCount = notificationRepository.countByRecipientUserIdAndTypeAndIsReadFalse(userId, NotificationType.MESSAGE);
         Integer totalUnreadCount = classifiedUnreadCount + messageUnreadCount;
 
+        boolean isSubscribed = classifiedSubscriptionRepository.existsByUserId(userId);
+
         List<NotificationResponse> classifiedNotifications = getClassifiedNotifications(userId, unreadOnly)
                 .stream()
                 .limit(previewLimit)
@@ -157,7 +162,8 @@ public class NotificationService {
                 messageUnreadCount,
                 totalUnreadCount,
                 classifiedNotifications,
-                messageNotifications
+                messageNotifications,
+                isSubscribed
         );
     }
 }

@@ -7,6 +7,7 @@ public record NotificationSummaryResponse(
         Integer messageUnreadCount,
         Integer totalUnreadCount,
         List<NotificationResponse> classifiedNotifications,
-        List<NotificationResponse> messageNotifications
+        List<NotificationResponse> messageNotifications,
+        Boolean isSubscribedToClassifieds
 ){
 }
