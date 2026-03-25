@@ -7,23 +7,10 @@ import type {
 } from "../types/post";
 import { useState, useEffect, useRef, useCallback } from "react";
 import apiClient from "../api/client";
+import { Link } from "react-router-dom";
+import normalizePost from "../utils/normalizePost";
 
 const POSTS_PER_PAGE = 10;
-
-function normalizePost(item: FeedPostApiItem): BackendPost {
-  return {
-    id: item.id,
-    title: item.title,
-    content: item.content,
-    author: item.author,
-    postType: item.postType,
-    createdAt: item.createdAt,
-    likes: item.likeCount ?? 0,
-    commentCount: item.commentCount ?? 0,
-    isLikedByCurrentUser: item.likedByCurrentUser ?? false,
-    comments: item.comments ?? [],
-  };
-}
 
 function Feed() {
   const [posts, setPosts] = useState<BackendPost[]>([]);
@@ -108,7 +95,7 @@ function Feed() {
     setCreateError(null);
   };
 
-  const onCreatePost = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onCreatePost = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const title = form.title.trim();
@@ -155,17 +142,25 @@ function Feed() {
 
   return (
     <section className="mx-auto flex flex-col items-center px-4 py-8">
-      <div className="mb-6 flex items-center justify-center gap-8">
+      <div className="mb-6 flex flex-col items-center justify-center gap-8">
         <h1 className="font-display text-charcoal text-2xl font-extrabold">
           Latest Posts
         </h1>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="font-display cursor-pointer rounded-lg border border-red-200 bg-red-100 px-4 py-2 text-sm font-extrabold text-red-700 transition-colors hover:bg-red-200"
-        >
-          Create Post
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="font-display cursor-pointer rounded-lg border border-red-200 px-4 py-2 text-sm font-extrabold text-red-700 transition-colors hover:bg-red-200"
+          >
+            Create Post
+          </button>
+          <Link
+            to="/messages"
+            className="font-display text-teal cursor-pointer rounded-lg border border-blue-200 px-4 py-2 text-sm font-extrabold transition-colors hover:bg-blue-200"
+          >
+            View Messages
+          </Link>
+        </div>
       </div>
 
       {error && (

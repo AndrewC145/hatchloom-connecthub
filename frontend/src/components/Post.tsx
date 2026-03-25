@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { BackendPost, PostComment } from "../types/post";
 import apiClient from "../api/client";
+import { formatDateTime } from "../utils/dateUtils";
+import getCurrentUserId from "../utils/user";
 
 function getPostTypeBadgeClass(postType: string) {
   const lower = postType.toLowerCase();
@@ -20,20 +22,6 @@ function getPostTypeBadgeClass(postType: string) {
   return "border-red-200 bg-red-100 text-red-700";
 }
 
-function formatCreatedAt(value?: string) {
-  if (!value) return "Unknown date";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown date";
-
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 function Post({
   post,
   onDelete,
@@ -50,9 +38,7 @@ function Post({
     post.commentCount ?? post.comments?.length ?? 0,
   );
   const [commentInput, setCommentInput] = useState<string>("");
-  const user = localStorage.getItem("user");
-
-  const userId = user ? JSON.parse(user).userId : null;
+  const userId = getCurrentUserId();
 
   const addLike = async () => {
     try {
@@ -183,7 +169,7 @@ function Post({
             Created
           </p>
           <p className="text-text text-xs font-semibold">
-            {formatCreatedAt(post.createdAt)}
+            {formatDateTime(post.createdAt)}
           </p>
         </div>
       </div>
@@ -227,7 +213,7 @@ function Post({
                 </p>
                 <div className="flex justify-between">
                   <p className="text-text-soft mt-1 text-[0.65rem] font-semibold">
-                    {formatCreatedAt(comment.createdAt)}
+                    {formatDateTime(comment.createdAt)}
                   </p>
                   <button
                     hidden={userId !== comment.userId && userId !== post.author}
