@@ -1,7 +1,33 @@
 import { useConnecthubContext } from "../context/ConnecthubContext";
+import { useState, useEffect } from "react";
+import apiClient from "../api/client";
 
 function StatusBar() {
+  const [peopleApplied, setPeopleApplied] = useState<number>(0);
+  const [applicationUpdates, setApplicationUpdates] = useState<number>(0);
   const { messageUnreadCount, totalUnreadCount } = useConnecthubContext();
+
+  useEffect(() => {
+    const fetchApplicationData = async () => {
+      try {
+        const response = await apiClient.get(
+          "/api/classified/applications/me",
+          {
+            withCredentials: true,
+          },
+        );
+        console.log("Application data response:", response.data);
+        const applications = response.data;
+
+        setPeopleApplied(applications.classifiedPosts.length);
+        setApplicationUpdates(applications.totalApplications);
+      } catch (error) {
+        console.error("Error fetching application data:", error);
+      }
+    };
+
+    fetchApplicationData();
+  }, []);
   return (
     <section className="border-border bg-card mx-8 mb-7 grid grid-cols-[1fr_1px_1fr_1px_1fr] items-center rounded-2xl border-[1.5px] px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
       <div className="px-0 pr-5">
@@ -58,12 +84,16 @@ function StatusBar() {
           <div className="text-text hover:text-teal flex cursor-pointer items-center gap-2 text-[0.78rem] font-semibold">
             <span className="bg-pink size-1.5 rounded-full" />
             <span>Applied to your roles</span>
-            <span className="font-display text-pink ml-auto rounded-[99px] bg-[#fff0f5] px-2 py-[0.08rem] text-[0.65rem] font-extrabold"></span>
+            <span className="font-display text-pink ml-auto rounded-[99px] bg-[#fff0f5] px-2 py-[0.08rem] text-[0.65rem] font-extrabold">
+              {peopleApplied > 0 ? peopleApplied : 0}
+            </span>
           </div>
           <div className="text-text hover:text-teal flex cursor-pointer items-center gap-2 text-[0.78rem] font-semibold">
             <span className="bg-pink size-1.5 rounded-full" />
             <span>Your applications updates</span>
-            <span className="bg-teal-light font-display text-teal ml-auto rounded-[99px] px-2 py-[0.08rem] text-[0.65rem] font-extrabold"></span>
+            <span className="bg-teal-light font-display text-teal ml-auto rounded-[99px] px-2 py-[0.08rem] text-[0.65rem] font-extrabold">
+              {applicationUpdates > 0 ? applicationUpdates : 0}
+            </span>
           </div>
         </div>
       </div>

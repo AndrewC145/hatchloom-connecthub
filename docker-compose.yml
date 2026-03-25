@@ -20,6 +20,8 @@ services:
     container_name: connecthub-service
     ports:
       - '8080:8080'
+    env_file:
+      - .env
     environment:
       DB_HOST: ${DB_HOST}
       DB_USERNAME: ${DB_USERNAME}
@@ -35,7 +37,7 @@ services:
       - connecthub-network
 
 volumes:
-    postgres_data:
+  postgres_data:
 
 networks:
   connecthub-network:
