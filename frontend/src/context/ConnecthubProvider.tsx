@@ -11,6 +11,8 @@ function ConnecthubProvider({ children }: { children: React.ReactNode }) {
   const [messageNotifications, setMessageNotifications] = useState<any[]>([]);
   const [messageUnreadCount, setMessageUnreadCount] = useState<number>(0);
   const [totalUnreadCount, setTotalUnreadCount] = useState<number>(0);
+  const [isSubscribedToClassified, setIsSubscribedToClassified] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const fetchInfo = async () => {
@@ -30,6 +32,13 @@ function ConnecthubProvider({ children }: { children: React.ReactNode }) {
         });
 
         console.log(response);
+        const data = response.data;
+        setClassifiedNotifications(data.classifiedNotifications);
+        setClassifiedUnreadCount(data.classifiedUnreadCount);
+        setMessageNotifications(data.messageNotifications);
+        setMessageUnreadCount(data.messageUnreadCount);
+        setTotalUnreadCount(data.totalUnreadCount);
+        setIsSubscribedToClassified(data.isSubscribedToClassified);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
       }
@@ -51,6 +60,8 @@ function ConnecthubProvider({ children }: { children: React.ReactNode }) {
         setMessageUnreadCount,
         totalUnreadCount,
         setTotalUnreadCount,
+        isSubscribedToClassified,
+        setIsSubscribedToClassified,
       }}
     >
       {children}

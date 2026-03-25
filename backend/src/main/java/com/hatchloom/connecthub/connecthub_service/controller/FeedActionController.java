@@ -52,13 +52,13 @@ public class FeedActionController {
     }
 
     @PostMapping("/comment")
-    public ResponseEntity<String> addComment(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody CommentRequest request) {
+    public ResponseEntity<CommentResponse> addComment(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody CommentRequest request) {
         try {
             UUID userId = jwtUtil.extractUserId(authHeader);
-            feedActionService.addComment(request, userId);
-            return new ResponseEntity<>("Comment added successfully", HttpStatus.CREATED);
+            CommentResponse comment = feedActionService.addComment(request, userId);
+            return new ResponseEntity<>(comment, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 

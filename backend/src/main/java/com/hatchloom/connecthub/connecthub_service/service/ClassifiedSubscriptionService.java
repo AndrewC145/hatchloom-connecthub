@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.service;
 
 import com.hatchloom.connecthub.connecthub_service.model.ClassifiedSubscription;
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedSubscriptionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class ClassifiedSubscriptionService {
      * Unsubscribes a user from classified post notifications
      * @param userId The user ID who wants to unsubscribe
      */
+    @Transactional
     public void unsubscribe(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
