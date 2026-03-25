@@ -6,15 +6,16 @@ export type BackendPost = {
   postType: string;
   createdAt: string;
   likes: number;
-  comments: number;
+  commentCount: number;
+  comments?: PostComment[];
   isLikedByCurrentUser?: boolean;
 };
 
 export type PostComment = {
   id: number;
-  author: string;
+  userId: string;
   postId: number;
-  content: string;
+  commentText: string;
   createdAt: string;
 };
 
@@ -28,6 +29,7 @@ export type FeedPostApiItem = {
   likeCount?: number;
   commentCount?: number;
   likedByCurrentUser?: boolean;
+  comments?: PostComment[];
 };
 
 export type CursorResponse<T> = {

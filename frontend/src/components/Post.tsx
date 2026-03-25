@@ -45,9 +45,9 @@ function Post({
     post.isLikedByCurrentUser ?? false,
   );
   const [likesCount, setLikesCount] = useState<number>(post.likes ?? 0);
-  const [comments, setComments] = useState<PostComment[]>([]);
+  const [comments, setComments] = useState<PostComment[]>(post.comments ?? []);
   const [commentsCount, setCommentsCount] = useState<number>(
-    post.comments ?? 0,
+    post.commentCount ?? post.comments?.length ?? 0,
   );
   const [commentInput, setCommentInput] = useState<string>("");
   const user = localStorage.getItem("user");
@@ -189,7 +189,6 @@ function Post({
           <span className="text-charcoal text-xs font-semibold">
             {likesCount} likes
           </span>
-
           <span className="text-text-soft ml-auto text-xs font-semibold">
             {commentsCount} comments
           </span>
@@ -207,7 +206,7 @@ function Post({
                 className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-2"
               >
                 <p className="text-charcoal text-xs leading-relaxed font-semibold">
-                  {comment.content}
+                  {comment.commentText}
                 </p>
                 <p className="text-text-soft mt-1 text-[0.65rem] font-semibold">
                   {formatCreatedAt(comment.createdAt)}

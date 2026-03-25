@@ -19,8 +19,9 @@ function normalizePost(item: FeedPostApiItem): BackendPost {
     postType: item.postType,
     createdAt: item.createdAt,
     likes: item.likeCount ?? 0,
-    comments: item.commentCount ?? 0,
+    commentCount: item.commentCount ?? 0,
     isLikedByCurrentUser: item.likedByCurrentUser ?? false,
+    comments: item.comments ?? [],
   };
 }
 
