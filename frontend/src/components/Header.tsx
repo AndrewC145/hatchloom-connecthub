@@ -6,6 +6,7 @@ import {
 } from "../types/navlinks";
 import { useConnecthubContext } from "../context/ConnecthubContext";
 import { Link } from "react-router-dom";
+import apiClient from "../api/client";
 
 const NAV_LINKS: NavLink = [
   { name: "Explore", emoji: "🔭" },
@@ -135,8 +136,15 @@ function Header() {
               </div>
               <div className="max-h-90 overflow-y-auto pr-1">
                 {activeNotifications.length === 0 ? (
-                  <div className="text-text-soft font-display rounded-xl bg-[#f7f8fa] px-3 py-5 text-center text-[0.8rem] font-semibold">
-                    No notifications yet.
+                  <div>
+                    <div className="text-text-soft font-display rounded-xl bg-[#f7f8fa] px-3 py-5 text-center text-[0.8rem] font-semibold">
+                      No notifications yet.
+                    </div>
+                    {activePanel === "classified" && (
+                      <div className="mt-4">
+                        <SubscribeButton />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -161,6 +169,68 @@ function Header() {
         </div>
       </nav>
     </header>
+  );
+}
+
+function SubscribeButton() {
+  const [subscribed, setSubscribed] = useState<boolean>(false);
+  const [isSubscribing, setIsSubscribing] = useState<boolean>(false);
+
+  const subscribe = async () => {
+    if (subscribed || isSubscribing) return;
+
+    setIsSubscribing(true);
+
+    try {
+      const response = await apiClient.post("/api/classified/subscriptions");
+
+      if (response.status === 201) {
+        console.log(response.data);
+        setSubscribed(true);
+      }
+    } catch (error) {
+      console.error("Subscription failed:", error);
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  const unsubscribe = async () => {
+    if (!subscribed || isSubscribing) return;
+
+    setIsSubscribing(true);
+    try {
+      const response = await apiClient.delete("/api/classified/subscriptions");
+
+      if (response.status === 200) {
+        console.log(response.data);
+        setSubscribed(false);
+      }
+    } catch (error) {
+      console.error("Unsubscription failed:", error);
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  return (
+    <button>
+      {subscribed ? (
+        <span
+          onClick={unsubscribe}
+          className="font-display cursor-pointer rounded-lg border border-red-200 px-3 py-1 text-sm text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-800"
+        >
+          Unsubscribe
+        </span>
+      ) : (
+        <span
+          onClick={subscribe}
+          className="font-display cursor-pointer rounded-lg border border-green-200 px-3 py-1 text-sm text-green-600 transition-all duration-200 hover:bg-green-50 hover:text-green-800"
+        >
+          Subscribe
+        </span>
+      )}
+    </button>
   );
 }
 
