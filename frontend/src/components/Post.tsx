@@ -10,11 +10,11 @@ function getPostTypeBadgeClass(postType: string) {
   }
 
   if (lower.includes("achievement")) {
-    return "border-gray-300 bg-gray-100 text-gray-700";
+    return "border-amber-300 bg-amber-100 text-amber-700";
   }
 
   if (lower.includes("share")) {
-    return "border-gray-200 bg-white text-gray-700";
+    return "border-green-200 bg-green-300 text-green-800";
   }
 
   return "border-red-200 bg-red-100 text-red-700";
@@ -122,8 +122,24 @@ function Post({
     }
   };
 
+  const deleteComment = async (commentId: number) => {
+    try {
+      const response = await apiClient.delete(
+        `/api/feed/actions/comment/${commentId}`,
+      );
+
+      console.log(response);
+      if (response.status === 200) {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+        setCommentsCount((prev) => Math.max(prev - 1, 0));
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
+  };
+
   return (
-    <article className="border-border bg-card w-40 rounded-2xl border-[1.5px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:w-48 md:w-64 lg:w-90 xl:w-150">
+    <article className="border-border bg-card w-40 rounded-2xl border-[1.5px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-200 sm:w-48 md:w-64 lg:w-90 xl:w-150">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display text-text-soft text-[0.7rem] font-extrabold uppercase">
@@ -208,9 +224,20 @@ function Post({
                 <p className="text-charcoal text-xs leading-relaxed font-semibold">
                   {comment.commentText}
                 </p>
-                <p className="text-text-soft mt-1 text-[0.65rem] font-semibold">
-                  {formatCreatedAt(comment.createdAt)}
-                </p>
+                <div className="flex justify-between">
+                  <p className="text-text-soft mt-1 text-[0.65rem] font-semibold">
+                    {formatCreatedAt(comment.createdAt)}
+                  </p>
+                  <button
+                    disabled={
+                      userId !== comment.userId && userId !== post.author
+                    }
+                    onClick={() => deleteComment(comment.id)}
+                    className="font-display mt-1 cursor-pointer text-[0.6rem] font-extrabold text-red-600 uppercase hover:text-red-800 disabled:cursor-not-allowed disabled:text-red-300"
+                  >
+                    X
+                  </button>
+                </div>
               </div>
             ))
           )}
