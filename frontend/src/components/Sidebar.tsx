@@ -1,4 +1,5 @@
 import { type SidebarItem, type SidebarSection } from "../types/sidebar";
+import { Link } from "react-router-dom";
 
 const HUB_HOME: SidebarItem = {
   name: "Hub Home",
@@ -13,6 +14,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         name: "Feed & Channels",
         icon: "💬",
+        link: "/feed",
       },
       {
         name: "Mailbox",
@@ -58,7 +60,8 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
 
 function SidebarRow({ item }: { item: SidebarItem }) {
   return (
-    <button
+    <Link
+      to={item.link || "#"}
       type="button"
       className={`flex w-full cursor-pointer items-center gap-2 rounded-[9px] px-3 py-2 text-left text-[0.8rem] font-semibold transition-all duration-200 ${
         item.active
@@ -70,7 +73,7 @@ function SidebarRow({ item }: { item: SidebarItem }) {
         {item.icon}
       </span>
       <span>{item.name}</span>
-    </button>
+    </Link>
   );
 }
 

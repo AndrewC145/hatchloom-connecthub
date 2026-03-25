@@ -30,6 +30,12 @@ function ConnecthubProvider({ children }: { children: React.ReactNode }) {
         });
 
         console.log(response);
+        const data = response.data;
+        setClassifiedNotifications(data.classifiedNotifications);
+        setClassifiedUnreadCount(data.classifiedUnreadCount);
+        setMessageNotifications(data.messageNotifications);
+        setMessageUnreadCount(data.messageUnreadCount);
+        setTotalUnreadCount(data.totalUnreadCount);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
       }
