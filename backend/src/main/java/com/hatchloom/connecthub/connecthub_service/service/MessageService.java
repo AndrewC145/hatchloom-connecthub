@@ -69,7 +69,7 @@ public class MessageService {
         Messages savedMessage = messageRepository.save(m);
 
         messageNotificationObserver.update(savedMessage, recipientId);
-        return new SendMessageResponse(c.getId(), savedMessage.getId(), lesserId, greaterId, savedMessage.getContent(), savedMessage.getCreatedAt());
+        return new SendMessageResponse(c.getId(), savedMessage.getId(), senderId, recipientId, savedMessage.getContent(), savedMessage.getCreatedAt());
     }
 
     /**
