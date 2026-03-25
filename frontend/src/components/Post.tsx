@@ -38,7 +38,13 @@ function formatCreatedAt(value?: string) {
   });
 }
 
-function Post({ post }: PostProps) {
+function Post({
+  post,
+  onDelete,
+}: {
+  post: BackendPost;
+  onDelete?: (postId: number) => void;
+}) {
   const [liked, setLiked] = useState<boolean>(
     post.isLikedByCurrentUser ?? false,
   );
@@ -48,6 +54,9 @@ function Post({ post }: PostProps) {
     post.comments ?? 0,
   );
   const [commentInput, setCommentInput] = useState<string>("");
+  const user = localStorage.getItem("user");
+
+  const userId = user ? JSON.parse(user).userId : null;
 
   const addLike = async () => {
     try {
@@ -83,6 +92,19 @@ function Post({ post }: PostProps) {
     }
   };
 
+  const deletePost = async () => {
+    try {
+      const response = await apiClient.delete(`/api/feed/${post.id}`);
+      console.log("Delete response:", response.data);
+
+      if (response.status === 200) {
+        onDelete?.(post.id);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
   return (
     <article className="border-border bg-card w-40 rounded-2xl border-[1.5px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:w-48 md:w-64 lg:w-90 xl:w-150">
       <div className="mb-3 flex items-start justify-between gap-3">
@@ -94,16 +116,23 @@ function Post({ post }: PostProps) {
             {post.title}
           </h3>
         </div>
-
-        <span
-          className={`font-display shrink-0 rounded-[99px] border px-2.5 py-1 text-[0.60rem] font-extrabold uppercase ${getPostTypeBadgeClass(
-            post.postType,
-          )}`}
-        >
-          {post.postType.toUpperCase()}
-        </span>
+        <div className="flex flex-col gap-3">
+          <span
+            className={`font-display shrink-0 rounded-[99px] border px-2.5 py-1 text-[0.60rem] font-extrabold uppercase ${getPostTypeBadgeClass(
+              post.postType,
+            )}`}
+          >
+            {post.postType.toUpperCase()}
+          </span>
+          <button
+            className="font-display shrink-0 cursor-pointer rounded-[99px] border px-2.5 py-1 text-[0.60rem] font-extrabold uppercase"
+            hidden={userId !== post.author}
+            onClick={deletePost}
+          >
+            Delete
+          </button>
+        </div>
       </div>
-
       <p className="text-text mb-4 text-sm leading-relaxed">{post.content}</p>
 
       <div className="border-border flex items-center justify-between border-t pt-3">

@@ -146,6 +146,10 @@ function Feed() {
     }
   };
 
+  const handleDeletePost = useCallback((postId: number) => {
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
+  }, []);
+
   return (
     <section className="mx-auto flex flex-col items-center px-4 py-8">
       <div className="mb-6 flex items-center justify-center gap-8">
@@ -168,7 +172,7 @@ function Feed() {
       )}
       <div className="flex flex-col items-center space-y-6">
         {posts.map((post: BackendPost) => (
-          <Post key={post.id} post={post} />
+          <Post key={post.id} post={post} onDelete={handleDeletePost} />
         ))}
       </div>
       <div ref={loaderRef} className="h-10" />
