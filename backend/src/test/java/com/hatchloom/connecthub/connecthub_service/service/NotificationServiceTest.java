@@ -52,6 +52,10 @@ public class NotificationServiceTest {
     private BaseUser thirdUser;
     private BaseProject project;
 
+    private String senderToken;
+    private String recipientToken;
+    private String thirdUserToken;
+
     @BeforeEach
     void setup() {
         messageRepository.deleteAll();
@@ -61,33 +65,34 @@ public class NotificationServiceTest {
         recipient = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Recipient", "recipient@gmail.com");
         thirdUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000003"), "Third User", "thirdUser@gmail.com");
         project = new BaseProject(UUID.fromString("00000000-0000-0000-0000-000000000011"), "Test Project", "This is a test project", sender, null);
+
+        senderToken = JwtUtilTest.generateTestToken(sender.id);
+        recipientToken = JwtUtilTest.generateTestToken(recipient.id);
+        thirdUserToken = JwtUtilTest.generateTestToken(thirdUser.id);
     }
 
     @Test
     @DisplayName("Test that creating a classified post sends a notification to those subscribed")
     void testClassifiedPostNotification() throws Exception {
-        SubscribeRequest dto = new SubscribeRequest(recipient.id);
-        SubscribeRequest dto2 = new SubscribeRequest(thirdUser.id);
+
         mockMvc.perform(post("/api/classified/subscriptions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user(recipient.name)))
+                        .header("Authorization", "Bearer " + recipientToken))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/classified/subscriptions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto2))
                 .with(csrf())
-                .with(user(thirdUser.name)))
+                        .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isCreated());
 
-        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post", sender.id), project.id, "open");
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, "open");
         mockMvc.perform(post("/api/classified")
         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf())
-                .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderToken))
                 .andExpect(status().isCreated());
 
         Assertions.assertEquals(2, notificationRepository.count());
@@ -96,7 +101,7 @@ public class NotificationServiceTest {
 
         MvcResult res1 = mockMvc.perform(get("/api/notifications/{userId}/classified", recipient.id)
                 .param("unread", "true")
-                .with(user(recipient.name))
+                        .header("Authorization", "Bearer " + recipientToken)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -106,7 +111,7 @@ public class NotificationServiceTest {
 
         MvcResult res2 = mockMvc.perform(get("/api/notifications/{userId}/classified", thirdUser.id)
                 .param("unread", "true")
-                .with(user(thirdUser.name))
+                        .header("Authorization", "Bearer " + thirdUserToken)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -121,28 +126,25 @@ public class NotificationServiceTest {
     @Test
     @DisplayName("Test that marking a notification as read works correctly")
     void testMarkNotificationAsRead() throws Exception {
-        SubscribeRequest dto = new SubscribeRequest(recipient.id);
-        SubscribeRequest dto2 = new SubscribeRequest(thirdUser.id);
+
         mockMvc.perform(post("/api/classified/subscriptions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user(recipient.name)))
+                        .header("Authorization", "Bearer " + recipientToken))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/classified/subscriptions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto2))
                         .with(csrf())
-                        .with(user(thirdUser.name)))
+                        .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isCreated());
 
-        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post", sender.id), project.id, "open");
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, "open");
         mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
-                        .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderToken))
                 .andExpect(status().isCreated());
 
         Assertions.assertEquals(2, notificationRepository.count());
@@ -151,7 +153,7 @@ public class NotificationServiceTest {
 
         MvcResult res1 = mockMvc.perform(get("/api/notifications/{userId}/classified", recipient.id)
                         .param("unread", "true")
-                        .with(user(recipient.name))
+                        .header("Authorization", "Bearer " + recipientToken)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -161,7 +163,7 @@ public class NotificationServiceTest {
 
         MvcResult res2 = mockMvc.perform(get("/api/notifications/{userId}/classified", thirdUser.id)
                         .param("unread", "true")
-                        .with(user(thirdUser.name))
+                        .header("Authorization", "Bearer " + thirdUserToken)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -177,12 +179,12 @@ public class NotificationServiceTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(recipient.id))
                 .with(csrf())
-                .with(user(recipient.name)))
+                        .header("Authorization", "Bearer " + recipientToken))
                 .andExpect(status().isOk());
 
         MvcResult res3 = mockMvc.perform(get("/api/notifications/{userId}/classified", recipient.id)
                         .param("unread", "true")
-                        .with(user(recipient.name))
+                        .header("Authorization", "Bearer " + recipientToken)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -196,12 +198,12 @@ public class NotificationServiceTest {
     @Test
     @DisplayName("Test messaging notifications are sent when a message is created")
     void testMessageNotification() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello");
+        SendMessageRequest request = new SendMessageRequest(null, "Hello");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf())
-                .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderToken))
                 .andExpect(status().isCreated());
 
         Assertions.assertEquals(1, notificationRepository.count());
@@ -210,7 +212,7 @@ public class NotificationServiceTest {
 
         MvcResult res = mockMvc.perform(get("/api/notifications/{userId}/messages", recipient.id)
                 .param("unread", "true")
-                .with(user(recipient.name))
+                        .header("Authorization", "Bearer " + recipientToken)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -223,28 +225,25 @@ public class NotificationServiceTest {
     @Test
     @DisplayName("Test that a user cannot mark another user's notification as read")
     void testMarkNotificationAsReadUnauthorized() throws Exception {
-        SubscribeRequest dto = new SubscribeRequest(recipient.id);
-        SubscribeRequest dto2 = new SubscribeRequest(thirdUser.id);
+
         mockMvc.perform(post("/api/classified/subscriptions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user(recipient.name)))
+                        .header("Authorization", "Bearer " + recipientToken))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/classified/subscriptions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto2))
                         .with(csrf())
-                        .with(user(thirdUser.name)))
+                        .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isCreated());
 
-        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post", sender.id), project.id, "open");
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, "open");
         mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
-                        .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderToken))
                 .andExpect(status().isCreated());
 
 
@@ -255,7 +254,7 @@ public class NotificationServiceTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(thirdUser.id))
                 .with(csrf())
-                .with(user(thirdUser.name)))
+                        .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isBadRequest());
     }
 }

@@ -41,24 +41,32 @@ public class MessageServiceTest {
     private BaseUser recipient;
     private BaseUser outsider;
 
+    private String senderUserToken;
+    private String recipientUserToken;
+    private String outsiderUserToken;
+
     @BeforeEach
     void setup() {
         messageRepository.deleteAll();
         sender = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Sender", "sender@gmail.com");
         recipient = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Recipient", "recipient@gmail.com");
         outsider = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000003"), "Outsider", "outsider@gmail.com");
+
+        senderUserToken = JwtUtilTest.generateTestToken(sender.id);
+        recipientUserToken = JwtUtilTest.generateTestToken(recipient.id);
+        outsiderUserToken = JwtUtilTest.generateTestToken(outsider.id);
     }
 
     @Test
     @DisplayName("Test sending a message successfully")
     void testSendMessageSuccess() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello how are you");
+        SendMessageRequest request = new SendMessageRequest(null, "Hello how are you");
 
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf())
-                .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("conversationId").exists())
                 .andExpect(jsonPath("messageId").exists())
@@ -78,27 +86,13 @@ public class MessageServiceTest {
     @Test
     @DisplayName("Test sending a message with missing content")
     void testSendMessageMissingContent() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "   ");
+        SendMessageRequest request = new SendMessageRequest(null, "   ");
 
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf())
-                .with(user(sender.name)))
-                .andExpect(status().isBadRequest());
-
-        Assertions.assertEquals(0, messageRepository.count());
-    }
-
-    @Test
-    @DisplayName("Test sending a message with missing senderId")
-    void testSendMessageMissingSenderId() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, null, "Hello");
-        mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .with(csrf())
-                .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, messageRepository.count());
@@ -107,12 +101,12 @@ public class MessageServiceTest {
     @Test
     @DisplayName("Test sending a message to self")
     void testSendMessageToSelf() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello myself");
+        SendMessageRequest request = new SendMessageRequest(null, "Hello myself");
         mockMvc.perform(post("/api/message/{recipientId}/send", sender.id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf())
-                .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, messageRepository.count());
@@ -121,12 +115,12 @@ public class MessageServiceTest {
     @Test
     @DisplayName("Test sending a message to non-existent conversation")
     void testSendMessageNonExistentConversation() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(UUID.fromString("00000000-0000-0000-0000-000000000004"), sender.id, "Hello");
+        SendMessageRequest request = new SendMessageRequest(UUID.fromString("00000000-0000-0000-0000-000000000004"), "Hello");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
-                        .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, messageRepository.count());
@@ -135,19 +129,18 @@ public class MessageServiceTest {
     @Test
     @DisplayName("Test receiving a message where a user is not a participant in")
     void testGetMessageUserNotParticipant() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello");
+        SendMessageRequest request = new SendMessageRequest(null, "Hello");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
-                        .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isCreated());
 
 
         mockMvc.perform(get("/api/message/conversation/{conversationId}", 1)
-                .param("userId", outsider.id.toString())
                 .with(csrf())
-                .with(user(outsider.name)))
+                        .header("Authorization", "Bearer " + outsiderUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(1, messageRepository.count());
@@ -156,22 +149,22 @@ public class MessageServiceTest {
     @Test
     @DisplayName("Test sending a message where a user is not a participant in the conversation")
     void testSendMessageUserNotParticipantInConversation() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello");
+        SendMessageRequest request = new SendMessageRequest(null, "Hello");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
-                        .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isCreated());
 
         Conversations conversation = messageRepository.findAll().getFirst().getConversation();
 
-        SendMessageRequest invalidRequest = new SendMessageRequest(conversation.getId(), outsider.id, "Hi");
+        SendMessageRequest invalidRequest = new SendMessageRequest(conversation.getId(), "Hi");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest))
                         .with(csrf())
-                        .with(user(outsider.name)))
+                        .header("Authorization", "Bearer " + outsiderUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(1, messageRepository.count());
@@ -180,28 +173,27 @@ public class MessageServiceTest {
     @Test
     @DisplayName("Test getting messages from a conversation successfully")
     void testGetConversationMessagesSuccess() throws Exception {
-        SendMessageRequest request = new SendMessageRequest(null, sender.id, "Hello");
+        SendMessageRequest request = new SendMessageRequest(null, "Hello");
         mockMvc.perform(post("/api/message/{recipientId}/send", recipient.id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf())
-                        .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isCreated());
 
         Conversations conversation = messageRepository.findAll().getFirst().getConversation();
 
-        SendMessageRequest request2 = new SendMessageRequest(conversation.getId(), recipient.id, "Hi there");
+        SendMessageRequest request2 = new SendMessageRequest(conversation.getId(), "Hi there");
         mockMvc.perform(post("/api/message/{recipientId}/send", sender.id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request2))
                         .with(csrf())
-                        .with(user(recipient.name)))
+                        .header("Authorization", "Bearer " + recipientUserToken))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/message/conversation/{conversationId}", conversation.getId())
-                .param("userId", sender.id.toString())
                 .with(csrf())
-                .with(user(sender.name)))
+                        .header("Authorization", "Bearer " + senderUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].conversationId").exists())
                 .andExpect(jsonPath("$[0].senderId").value(sender.id.toString()))

@@ -226,7 +226,7 @@ class ClassifiedPostServiceTest {
                 .andExpect(status().isCreated());
 
         mockMvc.perform(put("/api/classified/{postId}/status", 999)
-                        .param("userId", String.valueOf(testUser.id))
+
                         .param("newStatus", "filled")
                         .with(csrf())
                         .header("Authorization", "Bearer " + testUserToken))
@@ -419,7 +419,6 @@ class ClassifiedPostServiceTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/classified/{postId}/applications", createdPost.getId())
-                        .param("userId", String.valueOf(testUser.id))
                         .with(csrf())
                         .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
@@ -450,7 +449,6 @@ class ClassifiedPostServiceTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/classified/applications/me")
-                        .param("userId", String.valueOf(testUser2.id))
                         .with(csrf())
                         .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isOk());

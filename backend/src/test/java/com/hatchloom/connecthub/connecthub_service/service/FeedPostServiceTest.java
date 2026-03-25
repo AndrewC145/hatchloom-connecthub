@@ -44,23 +44,29 @@ class FeedPostServiceTest {
 
     private UUID unauthorizedUserId;
 
+    private String testUserToken;
+    private String unauthorizedUserToken;
+
     @BeforeEach
     void setup() {
         feedPostRepository.deleteAll();
         testUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Test User", "Test@gmail.com");
         unauthorizedUserId = UUID.fromString("00000000-0000-0000-0000-000000000099");
+
+        testUserToken = JwtUtilTest.generateTestToken(testUser.id);
+        unauthorizedUserToken = JwtUtilTest.generateTestToken(unauthorizedUserId);
     }
 
     @Test
     @DisplayName("Test creating a new feed post successfully")
     void testCreateFeedPost() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post 1", "This is a test post", testUser.id), "share");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post 1", "This is a test post"), "share");
 
         mockMvc.perform(post("/api/feed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Test Post 1"))
                 .andExpect(jsonPath("$.content").value("This is a test post"))
@@ -79,13 +85,13 @@ class FeedPostServiceTest {
     @Test
     @DisplayName("Test creating a feed post with missing title")
     void createFeedPost_MissingTitle() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("", "This is a test post", testUser.id), "share");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("", "This is a test post"), "share");
 
         mockMvc.perform(post("/api/feed")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, feedPostRepository.count());
@@ -94,13 +100,13 @@ class FeedPostServiceTest {
     @Test
     @DisplayName("Test creating a feed post with missing content and author")
     void createFeedPost_MissingOtherInformation() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post 3", "", null), "share");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post 3", ""), "share");
 
         mockMvc.perform(post("/api/feed")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, feedPostRepository.count());
@@ -111,13 +117,13 @@ class FeedPostServiceTest {
     void createFeedPost_DifferentTypes() throws Exception {
         String[] postTypes = {"share", "announcement", "achievement"};
         for (String post : postTypes) {
-            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test " + post, "This is a test " + post, testUser.id), post);
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test " + post, "This is a test " + post), post);
 
             mockMvc.perform(post("/api/feed")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto))
                             .with(csrf())
-                            .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.title").value("Test " + post))
                     .andExpect(jsonPath("$.content").value("This is a test " + post))
@@ -130,13 +136,13 @@ class FeedPostServiceTest {
     @Test
     @DisplayName("Test creating a feed post with invalid post type")
     void createFeedPost_InvalidPostType() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Invalid", "This is a test post with invalid type", testUser.id), "invalidType");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Invalid", "This is a test post with invalid type"), "invalidType");
 
         mockMvc.perform(post("/api/feed")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, feedPostRepository.count());
@@ -145,13 +151,13 @@ class FeedPostServiceTest {
     @Test
     @DisplayName("Test creating a feed post with null post type")
     void createFeedPost_NullPostType() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Null Type", "This is a test post with null type", testUser.id), null);
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Null Type", "This is a test post with null type"), null);
 
         mockMvc.perform(post("/api/feed")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, feedPostRepository.count());
@@ -161,12 +167,12 @@ class FeedPostServiceTest {
     @Transactional
     @DisplayName("Test deleting a feed post successfully")
     void deleteFeedPost() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post to Delete", "This post will be deleted", testUser.id), "share");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post to Delete", "This post will be deleted"), "share");
         mockMvc.perform(post("/api/feed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated());
 
         List<Post> posts = feedPostRepository.findAll();
@@ -174,9 +180,8 @@ class FeedPostServiceTest {
 
         mockMvc.perform(delete("/api/feed/{postId}", post.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("userId", String.valueOf(testUser.id))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Post deleted successfully"));
 
@@ -187,21 +192,20 @@ class FeedPostServiceTest {
     @Transactional
     @DisplayName("Test deleting a post with invalid post Id")
     void deleteFeedPost_Invalid_PostId() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post to Delete", "This post will be deleted", testUser.id), "share");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post to Delete", "This post will be deleted"), "share");
         mockMvc.perform(post("/api/feed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated());
 
 
         mockMvc.perform(delete("/api/feed/{postId}", 999)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
-                .param("userId", String.valueOf(testUser.id))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Post with ID 999 does not exist"));
 
@@ -211,12 +215,12 @@ class FeedPostServiceTest {
     @Test
     @DisplayName("Test deleting a feed post with invalid user")
     void deleteFeedPost_InvalidUser() throws Exception {
-        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post to Delete", "This post will be deleted", testUser.id), "share");
+        PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post to Delete", "This post will be deleted"), "share");
         mockMvc.perform(post("/api/feed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated());
 
         List<Post> posts = feedPostRepository.findAll();
@@ -224,9 +228,8 @@ class FeedPostServiceTest {
 
         mockMvc.perform(delete("/api/feed/{postId}", post.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("userId", unauthorizedUserId.toString())
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + unauthorizedUserToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("User " + (unauthorizedUserId) + " is not authorized to delete post " + post.getId()));
 
@@ -237,19 +240,19 @@ class FeedPostServiceTest {
     @DisplayName("Test fetching posts for first page")
     void testGetFeedPostsWithPagination() throws Exception {
         for (int i = 1; i <= 45; i++) {
-            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + i, "This is test post number " + i, testUser.id), "share");
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + i, "This is test post number " + i), "share");
             mockMvc.perform(post("/api/feed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
                     .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated());
         }
 
         mockMvc.perform(get("/api/feed")
                 .param("limit", "25")
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(25))
                 .andExpect(jsonPath("$.hasNext").value(true))
@@ -265,22 +268,22 @@ class FeedPostServiceTest {
         int totalFetched = 0;
 
         for (int i = 0; i < upperLimit; i++) {
-            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + (i), "This is test post number " + (i), testUser.id), "share");
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + (i), "This is test post number " + (i)), "share");
             mockMvc.perform(post("/api/feed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
                     .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated());
         }
 
         for (int i = upperLimit; i < upperLimit * 2; i++) {
-            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + (i), "This is test post number " + (i), testUser.id), "achievement");
+            PostCreationRequest dto = new PostCreationRequest(new BasePostRequest("Test Post " + (i), "This is test post number " + (i)), "achievement");
             mockMvc.perform(post("/api/feed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
                     .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated());
         }
 
@@ -288,7 +291,7 @@ class FeedPostServiceTest {
             String response = mockMvc.perform(get("/api/feed")
                     .param("limit", "25").param("after", nextCursor)
                     .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
 
