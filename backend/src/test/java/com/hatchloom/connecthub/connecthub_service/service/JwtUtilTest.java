@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class JwtUtilTest {
-    private static final String SECRET = "your-secret-key-change-this-in-production-at-least-256-bits-long-for-security";
+    private static final String SECRET = "a-string-secret-at-least-256-bits-long";
 
     public static String generateTestToken(UUID userId) {
         SecretKey k = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
@@ -18,7 +18,7 @@ public class JwtUtilTest {
                 .subject(userId.toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 3600000))
-                .signWith(k, Jwts.SIG.HS512)
+                .signWith(k)
                 .compact();
     }
 }
