@@ -24,7 +24,7 @@ import java.util.UUID;
 public class FeedPostController {
     private final FeedPostService feedPostService;
     private final JwtUtil jwtUtil;
-    private FeedActionService feedActionService;
+    private final FeedActionService feedActionService;
 
     public FeedPostController(FeedPostService feedPostService, JwtUtil jwtUtil, FeedActionService feedActionService) {
         this.feedPostService = feedPostService;
