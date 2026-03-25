@@ -173,11 +173,12 @@ function Header() {
 }
 
 function SubscribeButton() {
-  const [subscribed, setSubscribed] = useState<boolean>(false);
+  const { isSubscribedToClassified, setIsSubscribedToClassified } =
+    useConnecthubContext();
   const [isSubscribing, setIsSubscribing] = useState<boolean>(false);
 
   const subscribe = async () => {
-    if (subscribed || isSubscribing) return;
+    if (isSubscribedToClassified || isSubscribing) return;
 
     setIsSubscribing(true);
 
@@ -186,7 +187,7 @@ function SubscribeButton() {
 
       if (response.status === 201) {
         console.log(response.data);
-        setSubscribed(true);
+        setIsSubscribedToClassified(true);
       }
     } catch (error) {
       console.error("Subscription failed:", error);
@@ -196,7 +197,7 @@ function SubscribeButton() {
   };
 
   const unsubscribe = async () => {
-    if (!subscribed || isSubscribing) return;
+    if (!isSubscribedToClassified || isSubscribing) return;
 
     setIsSubscribing(true);
     try {
@@ -204,7 +205,7 @@ function SubscribeButton() {
 
       if (response.status === 200) {
         console.log(response.data);
-        setSubscribed(false);
+        setIsSubscribedToClassified(false);
       }
     } catch (error) {
       console.error("Unsubscription failed:", error);
@@ -215,7 +216,7 @@ function SubscribeButton() {
 
   return (
     <button>
-      {subscribed ? (
+      {isSubscribedToClassified ? (
         <span
           onClick={unsubscribe}
           className="font-display cursor-pointer rounded-lg border border-red-200 px-3 py-1 text-sm text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-800"
