@@ -99,7 +99,7 @@ public class NotificationServiceTest {
         Assertions.assertEquals(1, notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(recipient.id, NotificationType.CLASSIFIED_CREATED).size());
         Assertions.assertEquals(1, notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(thirdUser.id, NotificationType.CLASSIFIED_CREATED).size());
 
-        MvcResult res1 = mockMvc.perform(get("/api/notifications/{userId}/classified", recipient.id)
+        MvcResult res1 = mockMvc.perform(get("/api/notifications/classified", recipient.id)
                 .param("unread", "true")
                         .header("Authorization", "Bearer " + recipientToken)
                 .with(csrf()))
@@ -109,7 +109,7 @@ public class NotificationServiceTest {
         String notifications1 = res1.getResponse().getContentAsString();
         List<NotificationResponse> notifications1List = objectMapper.readValue(notifications1, new TypeReference<List<NotificationResponse>>() {});
 
-        MvcResult res2 = mockMvc.perform(get("/api/notifications/{userId}/classified", thirdUser.id)
+        MvcResult res2 = mockMvc.perform(get("/api/notifications/classified", thirdUser.id)
                 .param("unread", "true")
                         .header("Authorization", "Bearer " + thirdUserToken)
                 .with(csrf()))
@@ -151,7 +151,7 @@ public class NotificationServiceTest {
         Assertions.assertEquals(1, notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(recipient.id, NotificationType.CLASSIFIED_CREATED).size());
         Assertions.assertEquals(1, notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(thirdUser.id, NotificationType.CLASSIFIED_CREATED).size());
 
-        MvcResult res1 = mockMvc.perform(get("/api/notifications/{userId}/classified", recipient.id)
+        MvcResult res1 = mockMvc.perform(get("/api/notifications/classified")
                         .param("unread", "true")
                         .header("Authorization", "Bearer " + recipientToken)
                         .with(csrf()))
@@ -161,7 +161,7 @@ public class NotificationServiceTest {
         String notifications1 = res1.getResponse().getContentAsString();
         List<NotificationResponse> notifications1List = objectMapper.readValue(notifications1, new TypeReference<List<NotificationResponse>>() {});
 
-        MvcResult res2 = mockMvc.perform(get("/api/notifications/{userId}/classified", thirdUser.id)
+        MvcResult res2 = mockMvc.perform(get("/api/notifications/classified", thirdUser.id)
                         .param("unread", "true")
                         .header("Authorization", "Bearer " + thirdUserToken)
                         .with(csrf()))
@@ -182,7 +182,7 @@ public class NotificationServiceTest {
                         .header("Authorization", "Bearer " + recipientToken))
                 .andExpect(status().isOk());
 
-        MvcResult res3 = mockMvc.perform(get("/api/notifications/{userId}/classified", recipient.id)
+        MvcResult res3 = mockMvc.perform(get("/api/notifications/classified")
                         .param("unread", "true")
                         .header("Authorization", "Bearer " + recipientToken)
                         .with(csrf()))
@@ -210,7 +210,7 @@ public class NotificationServiceTest {
         List<Notification> notifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(recipient.id, NotificationType.MESSAGE);
         Assertions.assertEquals(1, notifications.size());
 
-        MvcResult res = mockMvc.perform(get("/api/notifications/{userId}/messages", recipient.id)
+        MvcResult res = mockMvc.perform(get("/api/notifications/messages")
                 .param("unread", "true")
                         .header("Authorization", "Bearer " + recipientToken)
                 .with(csrf()))

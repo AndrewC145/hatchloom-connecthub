@@ -3,6 +3,7 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationSummaryResponse;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
+import com.hatchloom.connecthub.connecthub_service.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +19,18 @@ import java.util.UUID;
 @RequestMapping("/api/notifications")
 public class NotificationController {
     private final NotificationService notificationService;
+    private final JwtUtil jwtUtil;
 
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, JwtUtil jwtUtil) {
         this.notificationService = notificationService;
+        this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("/{userId}/all")
-    public ResponseEntity<?> getNotificationSummary(@PathVariable UUID userId, @RequestParam(defaultValue = "true") boolean unread,
+    @GetMapping("/all")
+    public ResponseEntity<?> getNotificationSummary(@RequestHeader("Authorization") String authHeader, @RequestParam(defaultValue = "true") boolean unread,
                                                     @RequestParam(defaultValue = "5") int limit) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             NotificationSummaryResponse summary = notificationService.getNotificationSummary(userId, unread, limit);
             return new ResponseEntity<>(summary, HttpStatus.OK);
         }
@@ -35,20 +39,22 @@ public class NotificationController {
         }
     }
 
-    @GetMapping("/{userId}/classified")
-    public ResponseEntity<List<NotificationResponse>> getClassifiedNotifications(@PathVariable UUID userId, @RequestParam boolean unread) {
+    @GetMapping("/classified")
+    public ResponseEntity<List<NotificationResponse>> getClassifiedNotifications(@RequestHeader("Authorization") String authHeader, @RequestParam boolean unread) {
+        UUID userId = jwtUtil.extractUserId(authHeader);
         return new ResponseEntity<>(notificationService.getClassifiedNotifications(userId, unread), HttpStatus.OK);
     }
 
-    @GetMapping("/{userId}/messages")
-    public ResponseEntity<List<NotificationResponse>> getMessageNotifications(@PathVariable UUID userId, @RequestParam boolean unread) {
+    @GetMapping("/messages")
+    public ResponseEntity<List<NotificationResponse>> getMessageNotifications(@RequestHeader("Authorization") String authHeader, @RequestParam boolean unread) {
+        UUID userId = jwtUtil.extractUserId(authHeader);
         return new ResponseEntity<>(notificationService.getMessageNotifications(userId, unread), HttpStatus.OK);
     }
 
     @PatchMapping("/{notificationId}/read")
-    public ResponseEntity<String> markAsRead(@PathVariable Integer notificationId,
-                                           @RequestBody UUID userId) {
+    public ResponseEntity<String> markAsRead(@RequestHeader("Authorization") String authHeader, @PathVariable Integer notificationId) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             notificationService.markAsRead(notificationId, userId);
             return new ResponseEntity<>("Notification marked as read", HttpStatus.OK);
         }
