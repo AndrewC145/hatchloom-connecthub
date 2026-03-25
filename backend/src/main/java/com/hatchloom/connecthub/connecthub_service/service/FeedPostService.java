@@ -9,6 +9,7 @@ import com.hatchloom.connecthub.connecthub_service.model.SharePost;
 import com.hatchloom.connecthub.connecthub_service.repository.FeedPostRepository;
 import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
 import com.hatchloom.connecthub.connecthub_service.utils.PostCursorPayload;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,6 +57,7 @@ public class FeedPostService {
 
     }
 
+    @Transactional
     public void deleteFeedPost(Integer postId, UUID userId) {
         if (postId == null) {
             throw new IllegalArgumentException("Post ID must not be null");
@@ -64,16 +66,13 @@ public class FeedPostService {
             throw new IllegalArgumentException("User ID must not be null");
         }
 
-        Post post = feedPostRepository.getPostById(postId);
-        if (post == null) {
-            throw new IllegalArgumentException("Post with ID " + postId + " does not exist");
-        }
+        Post post = feedPostRepository.findById(postId).orElseThrow(() ->new IllegalArgumentException("Post with ID " + postId + " does not exist"));
 
         if (!post.getAuthor().equals(userId)) {
             throw new IllegalArgumentException("User " + userId + " is not authorized to delete post " + postId);
         }
 
-        feedPostRepository.deletePostById(postId);
+        feedPostRepository.deleteById(postId);
     }
 
 
