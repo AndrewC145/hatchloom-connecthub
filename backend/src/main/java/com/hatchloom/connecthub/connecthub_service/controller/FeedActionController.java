@@ -3,6 +3,7 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 import com.hatchloom.connecthub.connecthub_service.dto.*;
 import com.hatchloom.connecthub.connecthub_service.model.FeedAction;
 import com.hatchloom.connecthub.connecthub_service.service.FeedActionService;
+import com.hatchloom.connecthub.connecthub_service.utils.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +20,18 @@ import java.util.UUID;
 @RequestMapping("/api/feed/actions")
 public class FeedActionController {
     private final FeedActionService feedActionService;
+    private final JwtUtil jwtUtil;
 
-    public FeedActionController(FeedActionService feedActionService) {
+    public FeedActionController(FeedActionService feedActionService, JwtUtil jwtUtil) {
         this.feedActionService = feedActionService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/like")
-    public ResponseEntity<String> likePost(@Valid @RequestBody LikeRequest request) {
+    public ResponseEntity<String> likePost(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody LikeRequest request) {
         try {
-            feedActionService.likePost(request);
+            UUID userId = jwtUtil.extractUserId(authHeader);
+            feedActionService.likePost(request, userId);
             return new ResponseEntity<>("Post liked successfully", HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -36,9 +40,10 @@ public class FeedActionController {
 
     @DeleteMapping("/like")
     public ResponseEntity<String> unlikePost(
-            @RequestParam Integer postId,
-            @RequestParam UUID userId) {
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam Integer postId) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             feedActionService.unlikePost(postId, userId);
             return new ResponseEntity<>("Post unliked successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -47,9 +52,10 @@ public class FeedActionController {
     }
 
     @PostMapping("/comment")
-    public ResponseEntity<String> addComment(@Valid @RequestBody CommentRequest request) {
+    public ResponseEntity<String> addComment(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody CommentRequest request) {
         try {
-            feedActionService.addComment(request);
+            UUID userId = jwtUtil.extractUserId(authHeader);
+            feedActionService.addComment(request, userId);
             return new ResponseEntity<>("Comment added successfully", HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -58,9 +64,11 @@ public class FeedActionController {
 
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<String> deleteComment(
-            @PathVariable Integer commentId,
-            @RequestParam UUID userId) {
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Integer commentId
+            ) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             feedActionService.deleteComment(commentId, userId);
             return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -70,9 +78,11 @@ public class FeedActionController {
 
     @GetMapping("/post/{postId}")
     public ResponseEntity<?> getPostActions(
-            @PathVariable Integer postId,
-            @RequestParam(required = false) UUID userId) {
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Integer postId
+            ) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             PostActionsResponse actions = feedActionService.getPostActions(postId, userId);
             return new ResponseEntity<>(actions, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -104,9 +114,10 @@ public class FeedActionController {
     @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<?> likeComment(
             @PathVariable Integer commentId,
-            @RequestBody LikeCommentRequest request) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
-            FeedAction like = feedActionService.likeComment(commentId, request.userId());
+            UUID userId = jwtUtil.extractUserId(authHeader);
+            FeedAction like = feedActionService.likeComment(commentId, userId);
             return new ResponseEntity<>(like, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -116,8 +127,9 @@ public class FeedActionController {
     @DeleteMapping("/comment/{commentId}/like")
     public ResponseEntity<String> unlikeComment(
             @PathVariable Integer commentId,
-            @RequestParam UUID userId) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             feedActionService.unlikeComment(commentId, userId);
             return new ResponseEntity<>("Comment unliked successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,7 +41,8 @@ class ClassifiedPostServiceTest {
     private BaseUser testUser;
     private BaseUser testUser2;
     private BaseProject testProject;
-
+    private String testUserToken;
+    private String testUser2Token;
 
     @BeforeEach
     void setup() {
@@ -51,19 +51,22 @@ class ClassifiedPostServiceTest {
         testUser = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "testuser", "test@gmail.com");
         testProject = new BaseProject(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Test Project", "A project for testing", testUser, List.of());
         testUser2 = new BaseUser(UUID.fromString("00000000-0000-0000-0000-000000000003"), "testuser2", "test2@gmail.com");
+
+        testUserToken = JwtUtilTest.generateTestToken(testUser.id);
+        testUser2Token = JwtUtilTest.generateTestToken(testUser2.id);
     }
 
     @Test
     @DisplayName("Test creating a classified post with valid data")
     void testCreateClassifiedPost() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Classified test post"))
                 .andExpect(jsonPath("$.content").value("This is a classified test"))
@@ -81,13 +84,13 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with invalid status")
     void testCreateClassifiedPostInvalidStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "invalid_status");
+                "This is a classified test"), testProject.id, "invalid_status");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, classifiedPostRepository.count());
@@ -96,13 +99,13 @@ class ClassifiedPostServiceTest {
     @Test
     @DisplayName("Test creating a classified post with null fields")
     void testCreateClassifiedPostNullFields() throws Exception {
-        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("", "", null), null, "open");
+        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("", ""), null, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, classifiedPostRepository.count());
@@ -112,13 +115,13 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with long title")
     void testCreateClassifiedPostLongTitle() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("A".repeat(300),
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, classifiedPostRepository.count());
@@ -128,13 +131,13 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with long content")
     void testCreateClassifiedPostLongContent() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "A".repeat(3001), testUser.id), testProject.id, "open");
+                "A".repeat(3001)), testProject.id, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, classifiedPostRepository.count());
@@ -147,33 +150,33 @@ class ClassifiedPostServiceTest {
 
         for (String status : statuses) {
             ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                    "This is a classified test", testUser.id), testProject.id, status);
+                    "This is a classified test"), testProject.id, status);
 
             mockMvc.perform(post("/api/classified")
             .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
                     .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated());
         }
 
         mockMvc.perform(get("/api/classified/filtered")
                 .param("statusType", "open")
                         .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3));
 
         mockMvc.perform(get("/api/classified/filtered")
                 .param("statusType", "invalid")
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                         .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/api/classified/filtered")
                         .param("statusType", "filled")
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 
@@ -184,24 +187,24 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test update classified post status")
     void testUpdateClassifiedPostStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
 
-        UpdateClassifiedStatusRequest updateDto = new UpdateClassifiedStatusRequest(testUser.id, "filled");
+        UpdateClassifiedStatusRequest updateDto = new UpdateClassifiedStatusRequest("filled");
         mockMvc.perform(put("/api/classified/{postId}/status", createdPost.getId())
                         .content(objectMapper.writeValueAsString(updateDto))
                         .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("filled"));
 
@@ -213,20 +216,20 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test update classified post status with a post that doesn't exist")
     void testUpdateClassifiedPostStatusInvalidStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(put("/api/classified/{postId}/status", 999)
                         .param("userId", String.valueOf(testUser.id))
                         .param("newStatus", "filled")
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(1, classifiedPostRepository.count());
@@ -241,20 +244,20 @@ class ClassifiedPostServiceTest {
 
         for (int i = 0; i < upperLimit; i++) {
             ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post" + i,
-                    "This is a classified test", testUser.id), testProject.id, "open");
+                    "This is a classified test"), testProject.id, "open");
 
             mockMvc.perform(post("/api/classified")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
             .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated());
         }
 
         mockMvc.perform(get("/api/classified")
                 .param("limit", "25")
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(25))
                 .andExpect(jsonPath("$.hasNext").value(true))
@@ -272,13 +275,13 @@ class ClassifiedPostServiceTest {
 
         for (int i = 0; i < upperLimit; i++) {
             ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post" + i,
-                    "This is a classified test", testUser.id), testProject.id, "open");
+                    "This is a classified test"), testProject.id, "open");
 
             mockMvc.perform(post("/api/classified")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto))
                             .with(csrf())
-                            .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isCreated());
         }
 
@@ -286,7 +289,7 @@ class ClassifiedPostServiceTest {
             String response = mockMvc.perform(get("/api/classified")
                     .param("limit", "25").param("after", nextCursor)
                     .with(csrf())
-                    .with(user("testuser")))
+                            .header("Authorization", "Bearer " + testUserToken))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
 
@@ -321,7 +324,7 @@ class ClassifiedPostServiceTest {
         mockMvc.perform(get("/api/classified")
                 .param("statusType", "invalid")
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isBadRequest());
     }
 
@@ -329,31 +332,28 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test applying to a classified post")
     void testApplyClassifiedPost() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .with(csrf())
-                .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
-        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
 
         mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(applicationDTO))
                         .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(applicationDTO))
                         .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(1, classifiedPostApplicationRepository.count());
@@ -363,37 +363,34 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test applying to a classified post that is not open")
     void testApplyClassifiedPostInvalidStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "filled");
+                "This is a classified test"), testProject.id, "filled");
 
         String response = mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
-        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
 
         mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(applicationDTO))
                         .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("Test applying to a classified post that doesn't exist")
     void testApplyClassifiedPostInvalidPost() throws Exception {
-        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
+
 
         mockMvc.perform(post("/api/classified/{postId}/apply", 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(applicationDTO))
-                        .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isBadRequest());
 
         Assertions.assertEquals(0, classifiedPostApplicationRepository.count());
@@ -403,30 +400,28 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test get all applications for a classified post")
     void testGetClassifiedPostApplications() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
-        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
 
         mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(applicationDTO))
                         .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/classified/{postId}/applications", createdPost.getId())
                         .param("userId", String.valueOf(testUser.id))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 
@@ -436,30 +431,28 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test get applications for a user")
     void testGetUserApplications() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test", testUser.id), testProject.id, "open");
+                "This is a classified test"), testProject.id, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .with(csrf())
-                        .with(user("testuser")))
+                        .header("Authorization", "Bearer " + testUserToken))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         ClassifiedPost createdPost = objectMapper.readValue(response, ClassifiedPost.class);
-        ClassifiedApplicationDTO applicationDTO = new ClassifiedApplicationDTO(testUser2.id);
 
         mockMvc.perform(post("/api/classified/{postId}/apply", createdPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(applicationDTO))
                         .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/classified/applications/me")
                         .param("userId", String.valueOf(testUser2.id))
                         .with(csrf())
-                        .with(user("testuser2")))
+                        .header("Authorization", "Bearer " + testUser2Token))
                 .andExpect(status().isOk());
     }
 }

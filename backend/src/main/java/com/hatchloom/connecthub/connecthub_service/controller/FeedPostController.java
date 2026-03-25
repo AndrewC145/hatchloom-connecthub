@@ -5,6 +5,7 @@ import com.hatchloom.connecthub.connecthub_service.dto.FeedPostResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.PostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.model.Post;
 import com.hatchloom.connecthub.connecthub_service.service.FeedPostService;
+import com.hatchloom.connecthub.connecthub_service.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,15 +21,18 @@ import java.util.UUID;
 @RequestMapping("/api/feed")
 public class FeedPostController {
     private final FeedPostService feedPostService;
+    private final JwtUtil jwtUtil;
 
-    public FeedPostController(FeedPostService feedPostService) {
+    public FeedPostController(FeedPostService feedPostService, JwtUtil jwtUtil) {
         this.feedPostService = feedPostService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping()
-    public ResponseEntity<Post> createPost(@RequestBody PostCreationRequest request) {
+    public ResponseEntity<Post> createPost(@RequestHeader("Authorization") String authHeader, @RequestBody PostCreationRequest request) {
         try {
-            Post createdPost = feedPostService.createFeedPost(request);
+            UUID userId = jwtUtil.extractUserId(authHeader);
+            Post createdPost = feedPostService.createFeedPost(request, userId);
             return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -55,8 +59,9 @@ public class FeedPostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<String> deletePost(
             @PathVariable Integer postId,
-            @RequestParam UUID userId) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
+            UUID userId = jwtUtil.extractUserId(authHeader);
             feedPostService.deleteFeedPost(postId, userId);
             return new ResponseEntity<>("Post deleted successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {

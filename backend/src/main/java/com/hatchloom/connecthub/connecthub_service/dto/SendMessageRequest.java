@@ -5,9 +5,8 @@ import java.util.UUID;
 /**
  * DTO for handling send message requests
  * @param conversationId
- * @param senderId
  * @param content
  */
-public record SendMessageRequest(UUID conversationId, UUID senderId, String content) {
+public record SendMessageRequest(UUID conversationId, String content) {
 
 }

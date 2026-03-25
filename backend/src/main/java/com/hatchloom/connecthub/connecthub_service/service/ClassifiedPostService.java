@@ -40,12 +40,10 @@ public class ClassifiedPostService {
      * @param request the incoming request containing the details
      * @return the created ClassifiedPost entity
      */
-    public ClassifiedPost createClassifiedPost(ClassifiedPostCreationRequest request) {
-        if (validateClassifiedRequest(request)) {
+    public ClassifiedPost createClassifiedPost(ClassifiedPostCreationRequest request, UUID authorId) {
+        if (validateClassifiedRequest(request, authorId)) {
             throw new IllegalArgumentException("Invalid classified post creation request");
         }
-
-        UUID authorId = request.basePost().authorId();
 
         ClassifiedPost post = new ClassifiedPost();
         post.setTitle(request.basePost().title());
@@ -195,7 +193,7 @@ public class ClassifiedPostService {
      * @param request the incoming request
      * @return a boolean indicating whether or not the request is valid
      */
-    private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request) {
+    private boolean validateClassifiedRequest(ClassifiedPostCreationRequest request, UUID authorId) {
         if (request == null) {
             throw new IllegalArgumentException("Request must not be null");
         }
@@ -207,7 +205,7 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Content must not be null or empty");
         }
 
-        if (request.basePost().authorId() == null) {
+        if (authorId == null) {
             throw new IllegalArgumentException("Author ID must not be null");
         }
 

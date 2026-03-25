@@ -35,14 +35,14 @@ public class FeedActionService {
      * @param request the like request containing post ID and user ID
      */
     @Transactional
-    public void likePost(LikeRequest request) {
+    public void likePost(LikeRequest request, UUID userId) {
         Post post = feedPostRepository.getPostById(request.postId());
         if (post == null) {
             throw new IllegalArgumentException("Post with ID " + request.postId() + " not found");
         }
 
         Optional<FeedAction> existingLike = feedActionRepository.findByPostIdAndUserIdAndActionType(
-                request.postId(), request.userId(), ActionType.LIKE.getValue());
+                request.postId(), userId, ActionType.LIKE.getValue());
 
         if (existingLike.isPresent()) {
             throw new IllegalArgumentException("User has already liked this post");
@@ -51,7 +51,7 @@ public class FeedActionService {
         FeedAction like = new FeedAction();
         like.setPost(post);
         like.setPostId(request.postId());
-        like.setUserId(request.userId());
+        like.setUserId(userId);
         like.setActionType(ActionType.LIKE.getValue());
 
         feedActionRepository.save(like);
@@ -79,7 +79,7 @@ public class FeedActionService {
       * @param request the request containing post ID, user ID, and comment text
      */
     @Transactional
-    public void addComment(CommentRequest request) {
+    public void addComment(CommentRequest request, UUID userId) {
         Post post = feedPostRepository.getPostById(request.postId());
         if (post == null) {
             throw new IllegalArgumentException("Post with ID " + request.postId() + " not found");
@@ -92,7 +92,7 @@ public class FeedActionService {
         FeedAction comment = new FeedAction();
         comment.setPost(post);
         comment.setPostId(request.postId());
-        comment.setUserId(request.userId());
+        comment.setUserId(userId);
         comment.setActionType(ActionType.COMMENT.getValue());
         comment.setCommentText(request.commentText().trim());
 

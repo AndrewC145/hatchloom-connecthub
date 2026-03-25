@@ -25,11 +25,10 @@ public class FeedPostService {
         this.cursorPaginationService = cursorPaginationService;
     }
 
-    public Post createFeedPost(PostCreationRequest request) {
+    public Post createFeedPost(PostCreationRequest request, UUID authorId) {
         Post post;
         String title = request.basePost().title();
         String content = request.basePost().content();
-        UUID authorId = request.basePost().authorId();
 
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Post title must not be null or blank");
