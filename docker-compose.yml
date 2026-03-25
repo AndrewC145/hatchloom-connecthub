@@ -14,6 +14,7 @@ services:
     networks:
       - connecthub-network
   connecthub-service:
+    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile
