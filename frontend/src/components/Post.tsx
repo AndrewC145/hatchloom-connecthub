@@ -221,6 +221,7 @@ function Post({
                 key={comment.id}
                 className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-2"
               >
+                <p className="text-charcoal mb-1 text-xs">{comment.userId}</p>
                 <p className="text-charcoal text-xs leading-relaxed font-semibold">
                   {comment.commentText}
                 </p>
