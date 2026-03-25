@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
+import Protected from "./components/Protected";
+import AuthCallback from "./pages/AuthCallback";
 
 import Connecthub from "./pages/Connecthub";
 
@@ -8,7 +10,15 @@ function App() {
     <BrowserRouter>
       <Header />
       <Routes>
-        <Route path="/" element={<Connecthub />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route
+          path="/"
+          element={
+            <Protected>
+              <Connecthub />
+            </Protected>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
