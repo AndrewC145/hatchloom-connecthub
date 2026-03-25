@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class JwtUtilTest {
-    private static final String SECRET = "a-string-secret-at-least-256-bits-long";
+    private static final String SECRET = "your-secret-key-change-this-in-production-at-least-256-bits-long-for-security";
 
     public static String generateTestToken(UUID userId) {
         SecretKey k = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
