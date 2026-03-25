@@ -2,10 +2,6 @@ import { useState } from "react";
 import type { BackendPost, PostComment } from "../types/post";
 import apiClient from "../api/client";
 
-type PostProps = {
-  post: BackendPost;
-};
-
 function getPostTypeBadgeClass(postType: string) {
   const lower = postType.toLowerCase();
 
@@ -105,6 +101,27 @@ function Post({
     }
   };
 
+  const addComment = async () => {
+    if (commentInput.trim() === "") return;
+
+    try {
+      const response = await apiClient.post(`/api/feed/actions/comment`, {
+        postId: post.id,
+        commentText: commentInput.trim(),
+      });
+
+      console.log(response);
+      if (response.status === 201) {
+        const newComment: PostComment = response.data;
+        setComments((prev) => [...prev, newComment]);
+        setCommentsCount((prev) => prev + 1);
+        setCommentInput("");
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
   return (
     <article className="border-border bg-card w-40 rounded-2xl border-[1.5px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:w-48 md:w-64 lg:w-90 xl:w-150">
       <div className="mb-3 flex items-start justify-between gap-3">
@@ -184,7 +201,7 @@ function Post({
               No comments yet.
             </p>
           ) : (
-            comments.map((comment) => (
+            comments.map((comment: PostComment) => (
               <div
                 key={comment.id}
                 className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-2"
@@ -205,15 +222,12 @@ function Post({
             type="text"
             value={commentInput}
             onChange={(event) => setCommentInput(event.target.value)}
-            onKeyDown={(event) => {
-              // if (event.key === "Enter") addComment();
-            }}
-            placeholder="Write a comment..."
+            placeholder="Add a comment..."
             className="border-border bg-bg text-charcoal flex-1 rounded-lg border px-3 py-2 text-xs outline-none"
           />
           <button
             type="button"
-            // onClick={addComment}
+            onClick={addComment}
             className="font-display cursor-pointer rounded-lg bg-black px-3 py-2 text-xs font-extrabold text-white transition-opacity hover:opacity-85"
           >
             Post
