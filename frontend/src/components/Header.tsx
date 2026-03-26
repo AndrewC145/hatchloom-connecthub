@@ -166,7 +166,6 @@ function SubscribeButton() {
       const response = await apiClient.post("/api/classified/subscriptions");
 
       if (response.status === 201) {
-        console.log(response.data);
         setIsSubscribedToClassified(true);
       }
     } catch (error) {
@@ -184,7 +183,6 @@ function SubscribeButton() {
       const response = await apiClient.delete("/api/classified/subscriptions");
 
       if (response.status === 200) {
-        console.log(response.data);
         setIsSubscribedToClassified(false);
       }
     } catch (error) {

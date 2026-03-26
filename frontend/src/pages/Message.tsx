@@ -37,7 +37,6 @@ function Message() {
       try {
         const response = await apiClient.get("/api/message/conversation/");
 
-        console.log(response);
         if (response.status === 200) {
           setConversations(response.data);
         }
@@ -60,7 +59,6 @@ function Message() {
           `/api/message/conversation/${activeConversationId}`,
         );
 
-        console.log(response);
         if (response.status === 200) {
           const fetchedMessages = response.data;
           setMessages(fetchedMessages);

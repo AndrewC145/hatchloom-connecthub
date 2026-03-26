@@ -48,8 +48,6 @@ function Feed() {
         },
       );
 
-      console.log(response.data);
-
       if (response.status === 200) {
         const incoming = (response.data.data ?? []).map(normalizePost);
         const newCursor = response.data.nextCursor;
@@ -117,8 +115,6 @@ function Feed() {
         },
         postType: form.postType,
       });
-
-      console.log("Create post response:", response);
 
       const newPost = normalizePost(response.data);
       setPosts((prev) => [newPost, ...prev]);

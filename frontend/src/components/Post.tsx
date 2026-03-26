@@ -46,8 +46,6 @@ function Post({
         postId: post.id,
       });
 
-      console.log("Like response:", response.data);
-
       if (response.status === 201) {
         setLiked(true);
         setLikesCount((prev) => prev + 1);
@@ -63,8 +61,6 @@ function Post({
         `/api/feed/actions/like?postId=${post.id}`,
       );
 
-      console.log("Unlike response:", response.data);
-
       if (response.status === 200) {
         setLiked(false);
         setLikesCount((prev) => Math.max(prev - 1, 0));
@@ -77,7 +73,6 @@ function Post({
   const deletePost = async () => {
     try {
       const response = await apiClient.delete(`/api/feed/${post.id}`);
-      console.log("Delete response:", response.data);
 
       if (response.status === 200) {
         onDelete?.(post.id);
@@ -96,7 +91,6 @@ function Post({
         commentText: commentInput.trim(),
       });
 
-      console.log(response);
       if (response.status === 201) {
         const newComment: PostComment = response.data;
         setComments((prev) => [...prev, newComment]);
@@ -114,7 +108,6 @@ function Post({
         `/api/feed/actions/comment/${commentId}`,
       );
 
-      console.log(response);
       if (response.status === 200) {
         setComments((prev) => prev.filter((c) => c.id !== commentId));
         setCommentsCount((prev) => Math.max(prev - 1, 0));

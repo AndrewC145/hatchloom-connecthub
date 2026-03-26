@@ -16,7 +16,7 @@ function StatusBar() {
             withCredentials: true,
           },
         );
-        console.log("Application data response:", response.data);
+
         const applications = response.data;
 
         setPeopleApplied(applications.classifiedPosts.length);
