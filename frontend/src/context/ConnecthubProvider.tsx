@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import apiClient from "../api/client";
 import { ConnecthubContext } from "./ConnecthubContext";
 
@@ -14,38 +14,42 @@ function ConnecthubProvider({ children }: { children: React.ReactNode }) {
   const [isSubscribedToClassified, setIsSubscribedToClassified] =
     useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchInfo = async () => {
-      const token = localStorage.getItem("access_token");
+  const fetchInfo = useCallback(async () => {
+    const token = localStorage.getItem("access_token");
 
-      if (!token) {
-        console.warn("No access token found, skipping fetch");
-        return;
-      }
+    if (!token) {
+      console.warn("No access token found, skipping fetch");
+      return;
+    }
 
-      try {
-        const response = await apiClient.get("/api/notifications/all", {
-          params: {
-            unread: true,
-            limit: 5,
-          },
-        });
+    try {
+      const response = await apiClient.get("/api/notifications/all", {
+        params: {
+          unread: true,
+          limit: 5,
+        },
+      });
 
-        console.log(response);
-        const data = response.data;
-        setClassifiedNotifications(data.classifiedNotifications);
-        setClassifiedUnreadCount(data.classifiedUnreadCount);
-        setMessageNotifications(data.messageNotifications);
-        setMessageUnreadCount(data.messageUnreadCount);
-        setTotalUnreadCount(data.totalUnreadCount);
-        setIsSubscribedToClassified(data.isSubscribedToClassified);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      }
-    };
-
-    fetchInfo();
+      const data = response.data;
+      setClassifiedNotifications(data.classifiedNotifications);
+      setClassifiedUnreadCount(data.classifiedUnreadCount);
+      setMessageNotifications(data.messageNotifications);
+      setMessageUnreadCount(data.messageUnreadCount);
+      setTotalUnreadCount(data.totalUnreadCount);
+      setIsSubscribedToClassified(data.isSubscribedToClassified);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchInfo();
+    const interval = setInterval(() => {
+      fetchInfo();
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [fetchInfo]);
 
   return (
     <ConnecthubContext.Provider

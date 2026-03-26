@@ -2,7 +2,7 @@ name: Deployment Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -25,17 +25,32 @@ jobs:
         env:
           OWNER: ${{ github.repository_owner }}
 
-      - name: Pull Docker Image
+      - name: Create shared network # temporary before kubernetes I think
+        run: |
+          docker network create connecthub-network || true
+
+      - name: Pull backend Image
         run: |
           docker pull ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
 
-      - name: Stop existing container
+      - name: Stop existing backend container
         run: |
           docker stop connecthub || true
           docker rm connecthub || true
 
-      - name: Run new container
-        run: | 
-            docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
-          
-      
+      - name: Run new backend container
+        run: |
+          docker run -d --name connecthub --network connecthub-network -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
+
+      - name: Pull frontend Image
+        run: |
+          ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}-frontend:latest
+
+      - name: Stop existing frontend container
+        run: |
+          docker stop connecthub-frontend || true
+          docker rm connecthub-frontend || true
+
+      - name: Run new frontend container
+        run: |
+          docker run -d --name connecthub-frontend --network connecthub-network -p 5173:80 ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}-frontend:latest
