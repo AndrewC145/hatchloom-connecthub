@@ -18,13 +18,16 @@ docker-compose up -d --build
 ```
 This command will build the Docker images, such as the Connecthub service and the Database service, and start the images inside the container.
 
-The application will now be running on http://localhost:8080
+The Spring boot will now be running on http://localhost:8080
+The React frontend will be running on http://localhost:5173
+The PostgreSQL database will be running on port 5432
 
 You will be presented with a login page because of the built-in Spring Security configuration.
 
 ### 3. Run Test Cases
 To run the test cases, execute the following command:
 ```bash
+cd backend
 mvn test
 ````
 This command will run all the test cases for the project located from the test folder using an H2 memory database

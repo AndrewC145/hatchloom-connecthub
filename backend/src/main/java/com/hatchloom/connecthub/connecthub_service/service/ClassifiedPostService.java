@@ -105,8 +105,8 @@ public class ClassifiedPostService {
      * @param userId the user ID to validate
      */
     private void validatePostParams(Integer postId, UUID userId) {
-        if (postId == null) {
-            throw new IllegalArgumentException("Post ID must not be null");
+        if (postId == null || postId <= 0) {
+            throw new IllegalArgumentException("Post ID must be positive");
         }
 
         if (userId == null) {

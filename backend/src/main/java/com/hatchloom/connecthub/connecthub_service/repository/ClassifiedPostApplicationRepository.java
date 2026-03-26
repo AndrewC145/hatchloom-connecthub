@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public interface ClassifiedPostApplicationRepository extends JpaRepository<ClassifiedPostApplication, Integer> {
     boolean existsClassifiedPostApplicationByApplicantIdAndClassifiedPostId(UUID applicantId, Integer classifiedPostId);
-    List<ClassifiedPostApplication> findByClassifiedPostIdOrderByAppliedAtDesc(Integer classifiedPostId);
     List<ClassifiedPostApplication> findByApplicantIdOrderByAppliedAtDesc(UUID applicantId);
 
     List<ClassifiedPostApplication> findByClassifiedPostId(Integer classifiedPostId);
