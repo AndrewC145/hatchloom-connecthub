@@ -44,7 +44,7 @@ jobs:
 
       - name: Pull frontend Image
         run: |
-          ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}-frontend:latest
+          docker pull ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}-frontend:latest
 
       - name: Stop existing frontend container
         run: |
